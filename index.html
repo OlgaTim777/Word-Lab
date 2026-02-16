@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang='ru'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Magic Pot v6.2 - Branding Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; }
+        * { box-sizing: border-box; user-select: none; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-dark); color: var(--text-light); display: flex; height: 100vh; overflow: hidden; }
+        
+        #editor-panel { width: 440px; background: var(--panel-bg); padding: 20px; border-right: 3px solid var(--gold); overflow-y: auto; flex-shrink: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        h2 { margin: 0 0 15px 0; font-family: 'Cinzel', serif; color: var(--gold); text-align: center; letter-spacing: 2px; }
+        
+        .magic-box { background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        .magic-box label { font-size: 11px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; font-weight: bold; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+        .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; }
+
+        input, textarea, select { width: 100%; padding: 6px; background: #120822; border: 1px solid #5a3e85; color: #fff; border-radius: 4px; font-size: 12px; outline: none; }
+        input:focus { border-color: var(--gold); }
+        select { cursor: pointer; }
+        
+        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
+        .btn-magic { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; color: #1a0b2e; font-weight: bold; font-family: 'Cinzel', serif; font-size: 13px; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-magic:active { transform: scale(0.98); }
+        
+        .btn-copy { background: var(--gold); }
+        .btn-save { background: #4cd964; }
+        
+        .btn-small { padding: 8px; background: #5a3e85; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin-top: 5px; width: 100%; text-transform: uppercase; font-weight: bold; }
+        .btn-small:hover { background: #764abc; }
+
+        #code-output { height: 60px; font-family: monospace; color: #76ff03; border: 1px solid var(--gold); font-size: 10px; overflow: hidden; background: #000; margin-bottom: 15px; }
+        #preview-area { flex-grow: 1; background: #000; position: relative; }
+        #live-frame { width: 100%; height: 100%; border: none; background: #000; }
+    </style>
+</head>
+<body>
+
+<div id='editor-panel'>
+    <h2>Magic Pot v6.2</h2>
+    
+    <div class="btn-group">
+        <button class='btn-magic btn-copy' onclick='copyCode()'>📋 КОПИРОВАТЬ</button>
+        <button class='btn-magic btn-save' onclick='downloadGame()'>💾 СКАЧАТЬ HTML</button>
+    </div>
+    <textarea id='code-output' readonly placeholder="Код для вставки..."></textarea>
+
+    <div class='magic-box'>
+        <label>🏷️ ЛОГОТИП / БРЕНДИНГ</label>
+        <input type='file' accept="image/*" onchange='handleFile(this, "logo")' title="Загрузить лого">
+        <div class='grid-2' style="margin-top:5px;">
+            <input type='number' id='l-w' value='100' title="Ширина (px)" oninput='updateCode()'>
+            <select id='l-shape' onchange='updateCode()' title="Форма логотипа">
+                <option value='0px'>Квадрат</option>
+                <option value='50%'>Круг</option>
+                <option value='20px'>Скругленный</option>
+            </select>
+        </div>
+        <div class='grid-2' style="margin-top:5px;">
+            <input type='number' id='l-x' value='92' title="Позиция X (%)" oninput='updateCode()'>
+            <input type='number' id='l-y' value='90' title="Позиция Y (%)" oninput='updateCode()'>
+        </div>
+        <div style="font-size:10px; color:#aaa; margin-top:3px;">X: % слева, Y: % сверху</div>
+    </div>
+
+    <div class='magic-box'>
+        <label>📝 ТЕКСТ УРОВНЕЙ</label>
+        <textarea id='m-list' rows='3' oninput='updateCode()'>The red cat likes fish&#10;Magic potion is green</textarea>
+    </div>
+
+    <div class='magic-box'>
+        <label>🎁 ПРИЗЫ И ЭМОДЖИ</label>
+        <input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'>
+        <div style="font-size:10px; color:#aaa; margin-top:5px;">Или картинка-приз:</div>
+        <input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'>
+        <div style="font-size:10px; color:#aaa; margin-top:5px;">Эмоджи ошибки:</div>
+        <input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'>
+    </div>
+
+    <div class='magic-box'>
+        <label>🗣️ ОЗВУЧКА (BRITISH 🇬🇧)</label>
+        <select id='v-preset' onchange='updateCode()'>
+            <option value="child_uk">🇬🇧 Child (Детский)</option>
+            <option value="teen_f_uk">🇬🇧 Teen Girl (Подросток-Д)</option>
+            <option value="teen_m_uk">🇬🇧 Teen Boy (Подросток-М)</option>
+            <option value="lady_uk">🇬🇧 Lady (Леди)</option>
+            <option value="gent_uk">🇬🇧 Gentleman (Джентльмен)</option>
+        </select>
+        <button class="btn-small" onclick="testVoice()">🔊 Test Voice (UK)</button>
+    </div>
+
+    <div class='magic-box'>
+        <label>⏱️ ТАЙМЕР</label>
+        <div class='grid-2'>
+            <select id='t-mode' onchange='updateCode()'>
+                <option value='up'>Секундомер</option>
+                <option value='down'>Обратный отсчет</option>
+            </select>
+            <input type='number' id='t-lim' value='60' title="Секунды" oninput='updateCode()'>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>🏺 КОТЕЛ (Позиция и Размер)</label>
+        <input type='file' accept="image/*" onchange='handleFile(this, "pot")' style="margin-bottom:5px;">
+        <div class='grid-4'>
+            <input type='number' id='p-x' value='50' title="X %" oninput='updateCode()'>
+            <input type='number' id='p-y' value='65' title="Y %" oninput='updateCode()'>
+            <input type='number' id='p-w' value='70' title="Ширина %" oninput='updateCode()'>
+            <input type='number' id='p-h' value='50' title="Высота %" oninput='updateCode()'>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>🧪 БАНОЧКИ (Размер и Расположение)</label>
+        <div class='grid-2' style="margin-bottom:5px;">
+             <input type='number' id='j-w' value='80' title="Ширина px" oninput='updateCode()'>
+             <input type='number' id='j-h' value='100' title="Высота px" oninput='updateCode()'>
+        </div>
+        <div class='grid-4'>
+            <input type='number' id='b-x' value='40' title="Start X" oninput='updateCode()'>
+            <input type='number' id='b-y' value='150' title="Start Y" oninput='updateCode()'>
+            <input type='number' id='b-gx' value='95' title="Gap X" oninput='updateCode()'>
+            <input type='number' id='b-gy' value='110' title="Gap Y" oninput='updateCode()'>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>🎨 ДИЗАЙН ИГРЫ</label>
+        <input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
+        <div class='grid-3' style="margin-top:5px;">
+            <input type='color' id='j-col' value='#ffffff' oninput='updateCode()'>
+            <input type='number' id='j-sz' value='16' title="Шрифт" oninput='updateCode()'>
+            <input type='number' id='j-off' value='0' title="Отступ" oninput='updateCode()'>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>👾 ГЕРОЙ</label>
+        <input type='file' accept="image/*" onchange='handleFile(this, "hero")'>
+        <div class='grid-3' style="margin-top:5px;">
+            <input type='number' id='h-s' value='25' oninput='updateCode()'>
+            <input type='number' id='h-x' value='80' oninput='updateCode()'>
+            <input type='number' id='h-y' value='45' oninput='updateCode()'>
+        </div>
+        <div class='grid-2' style="margin-top:5px;">
+            <input type='color' id='c-col' value='#000000'>
+            <input type='number' id='c-sz' value='18'>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>🎵 ЗВУКИ И ФОН</label>
+        <div class='grid-2'>
+             <input type='file' accept="image/*" onchange='handleFile(this, "bg")' title="Фон">
+             <input type='file' accept="audio/*" onchange='handleFile(this, "abg")' title="Музыка">
+        </div>
+        <div class='grid-2' style="margin-top:5px;">
+            <input type='file' accept="audio/*" onchange='handleFile(this, "awin")' title="Win">
+            <input type='file' accept="audio/*" onchange='handleFile(this, "afail")' title="Fail">
+        </div>
+    </div>
+</div>
+
+<div id='preview-area'><iframe id="live-frame"></iframe></div>
+
+<script>
+    let assets = {
+        bg: "https://i.imgur.com/UEU5VeO.jpeg",
+        hero: "https://i.ibb.co/m5pXm6S/monster.png",
+        pot: "https://i.imgur.com/eZ1HWGL.png",
+        jar: "https://i.imgur.com/zn0Uxnh.png",
+        logo: "", // Пустой по умолчанию
+        customPrize: "",
+        abg: "", 
+        awin: "https://actions.google.com/sounds/v1/cartoon/clime_up_the_ladder.ogg",
+        afail: "https://actions.google.com/sounds/v1/cartoon/boing.ogg"
+    };
+
+    let currentSource = "";
+
+    function getVoiceConfig(preset) {
+        switch(preset) {
+            case 'child_uk': return { pitch: 1.6, rate: 1.1, type: 'female' };
+            case 'teen_f_uk': return { pitch: 1.2, rate: 1.1, type: 'female' };
+            case 'teen_m_uk': return { pitch: 1.1, rate: 1.15, type: 'male' };
+            case 'lady_uk': return { pitch: 1.0, rate: 0.95, type: 'female' };
+            case 'gent_uk': return { pitch: 0.7, rate: 0.9, type: 'male' };
+            default: return { pitch: 1.0, rate: 1.0, type: 'female' };
+        }
+    }
+
+    function findBritishVoice(type) {
+        const voices = window.speechSynthesis.getVoices();
+        const britVoices = voices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
+        if (britVoices.length === 0) return null; 
+        
+        if (type === 'male') {
+            return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
+        } else {
+            return britVoices.find(v => v.name.includes('Female') || v.name.includes('Hazel') || v.name.includes('Martha') || v.name.includes('Susan')) || britVoices[0];
+        }
+    }
+
+    function testVoice() {
+        const preset = document.getElementById('v-preset').value;
+        const cfg = getVoiceConfig(preset);
+        let msg = new SpeechSynthesisUtterance("Hello! This is a proper British English test.");
+        const selected = findBritishVoice(cfg.type);
+        if(selected) msg.voice = selected; else msg.lang = 'en-GB';
+        msg.pitch = cfg.pitch;
+        msg.rate = cfg.rate;
+        window.speechSynthesis.speak(msg);
+    }
+
+    function handleFile(input, key) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => { assets[key] = e.target.result; updateCode(); };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function updateCode() {
+        const config = {
+            m: document.getElementById('m-list').value,
+            voice: document.getElementById('v-preset').value,
+            timer: { mode: document.getElementById('t-mode').value, val: document.getElementById('t-lim').value },
+            hero: { s: document.getElementById('h-s').value, x: document.getElementById('h-x').value, y: document.getElementById('h-y').value },
+            cloud: { col: document.getElementById('c-col').value, sz: document.getElementById('c-sz').value },
+            pot: { w: document.getElementById('p-w').value, h: document.getElementById('p-h').value, x: document.getElementById('p-x').value, y: document.getElementById('p-y').value },
+            jar: { w: document.getElementById('j-w').value, h: document.getElementById('j-h').value, col: document.getElementById('j-col').value, sz: document.getElementById('j-sz').value, off: document.getElementById('j-off').value },
+            bank: { x: document.getElementById('b-x').value, y: document.getElementById('b-y').value, gx: document.getElementById('b-gx').value, gy: document.getElementById('b-gy').value },
+            logo: { w: document.getElementById('l-w').value, x: document.getElementById('l-x').value, y: document.getElementById('l-y').value, shape: document.getElementById('l-shape').value },
+            assets: assets,
+            emojis: document.getElementById('prize-emojis').value.split(','),
+            failEmojis: document.getElementById('fail-emojis').value.split(',')
+        };
+
+        const finalHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Magic Pot Game</title>
+    <style>
+        body { margin:0; overflow:hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
+        #gv { width: 100vw; height: 100vh; position: relative; background: url('${config.assets.bg}') center/cover; }
+        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 30px; border: 2px solid gold; font-size: 22px; z-index: 100; font-weight: bold; }
+        #spk { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; z-index: 100; filter: drop-shadow(0 0 5px white); }
+        
+        /* LOGO STYLE */
+        #game-logo {
+            position: absolute;
+            width: ${config.logo.w}px;
+            left: ${config.logo.x}%;
+            top: ${config.logo.y}%;
+            transform: translate(-50%, -50%);
+            border-radius: ${config.logo.shape};
+            z-index: 95;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            pointer-events: none; /* Чтобы лого не мешало кликать */
+            object-fit: cover;
+        }
+
+        #hr { position: absolute; width: ${config.hero.s}%; left: ${config.hero.x}%; top: ${config.hero.y}%; transform: translate(-50%,-50%); z-index: 10; cursor:pointer; }
+        #hr img { width: 100%; animation: float 3s infinite ease-in-out; }
+        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+        
+        #hc { 
+            position: absolute; 
+            bottom: 110%; left: 50%; transform: translateX(-50%); 
+            background: white; 
+            color: ${config.cloud.col}; 
+            font-size: ${config.cloud.sz}px; 
+            font-weight: bold;
+            padding: 15px 25px; 
+            border-radius: 40px; 
+            display: none; 
+            white-space: nowrap; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+            z-index: 20; 
+            border: 2px solid #ccc;
+        }
+        #hc::before { content:''; position:absolute; bottom:-10px; left:30%; width:15px; height:15px; background:white; border-radius:50%; box-shadow: -2px 2px 2px rgba(0,0,0,0.1); }
+        #hc::after { content:''; position:absolute; bottom:-20px; left:20%; width:10px; height:10px; background:white; border-radius:50%; box-shadow: -2px 2px 2px rgba(0,0,0,0.1); }
+
+        #cz { position: absolute; width: ${config.pot.w}%; height: ${config.pot.h}%; left: ${config.pot.x}%; top: ${config.pot.y}%; transform: translate(-50%,-50%); background: url('${config.assets.pot}') center/contain no-repeat; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        .slots { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 85%; margin-top: 40px; }
+        .slot { width: ${config.jar.w}px; height: ${config.jar.h}px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px; flex-shrink: 0; }
+        
+        #bank { position: absolute; inset: 0; pointer-events: none; }
+        .card { width: ${config.jar.w}px; height: ${config.jar.h}px; background: url('${config.assets.jar}') center/contain no-repeat; display: flex; align-items: center; justify-content: center; color: ${config.jar.col}; font-size: ${config.jar.sz}px; font-weight: bold; cursor: pointer; text-shadow: 1px 1px 2px #000; padding-top: ${config.jar.off}px; pointer-events: auto; position: absolute; transition: transform 0.2s; z-index: 20; }
+        .card:hover { transform: scale(1.05); }
+
+        .btn-wrap { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 100; }
+        .game-btn { padding: 15px 40px; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: transform 0.2s; }
+        .game-btn:active { transform: translateX(-50%) scale(0.95); }
+        #btn-check { background: linear-gradient(#4cd964, #28a745); }
+        #btn-reset { background: linear-gradient(#a8a8a8, #666); }
+
+        .fx-p { position: absolute; border-radius: 50%; animation: fwork 2.5s forwards; z-index: 100; pointer-events: none; }
+        @keyframes fwork { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--rx)), var(--ry)) scale(var(--rs)); opacity: 0; } }
+
+        .f-red { position: fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
+        @keyframes f-out { 0% {opacity:1} 100% {opacity:0} }
+
+        .fly-e { position: absolute; transform: translate(-50%,-50%); font-size: 80px; animation: p-fly 2s forwards; z-index: 150; pointer-events: none; display: flex; justify-content:center; align-items:center;}
+        .fly-e img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 10px gold); }
+        @keyframes p-fly { 0%{transform:translate(-50%, 0) scale(0)} 50%{transform:translate(calc(-50% + var(--rx)), -150px) scale(1.3)} 100%{transform:translate(calc(-50% + var(--rx)), -100px) scale(1); opacity:1} }
+
+        #fin { position: fixed; inset: 0; background: rgba(20, 10, 40, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: gold; text-align: center; }
+        .gallery { display: flex; gap: 10px; margin-top: 20px; font-size: 45px; flex-wrap: wrap; justify-content: center; max-width: 80%; }
+        .gallery img { width: 80px; height: 80px; object-fit: contain; }
+    </style>
+</head>
+<body>
+    <div id="gv">
+        ${config.assets.logo ? `<img id="game-logo" src="${config.assets.logo}">` : ''}
+        <div id="ui">🏆 <span id="sv">0</span> | <span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
+        <div id="spk" onclick="speak()">🔊</div>
+        <div id="hr" onclick="toggleHint()"><div id="hc"></div><img src="${config.assets.hero}"></div>
+        <div id="cz"><div class="slots" id="sc"></div></div>
+        <div id="bank"></div>
+        <div class="btn-wrap">
+            <button id="btn-check" class="game-btn" onclick="check()">CHECK</button>
+            <button id="btn-reset" class="game-btn" onclick="initLevel()">RESET</button>
+        </div>
+        <div id="fin">
+            <h1 style="font-family:Cinzel,serif; font-size:4em;">Level Complete!</h1>
+            <p style="font-size:24px;">Score: <span id="fs">0</span> | Time: <span id="ft">0</span></p>
+            <div class="gallery" id="pg"></div>
+            <button onclick="location.reload()" class="game-btn" style="background: gold; color: black; margin-top:30px; position:static;">PLAY AGAIN</button>
+        </div>
+    </div>
+    <script>
+        const cfg = ${JSON.stringify(config)};
+        let step = 0, score = 0, collected = [], timeVal = 0, tInt, audBG;
+        let sentences = cfg.m.split('\\n').filter(s => s.trim());
+        const topEdge = cfg.pot.y - (cfg.pot.h / 2);
+
+        let gameVoices = [];
+        const loadVoices = () => { gameVoices = window.speechSynthesis.getVoices(); };
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        setTimeout(loadVoices, 1000);
+
+        function getVoiceConfig(preset) {
+            switch(preset) {
+                case 'child_uk': return { pitch: 1.6, rate: 1.1, type: 'female' };
+                case 'teen_f_uk': return { pitch: 1.2, rate: 1.1, type: 'female' };
+                case 'teen_m_uk': return { pitch: 1.1, rate: 1.15, type: 'male' };
+                case 'lady_uk': return { pitch: 1.0, rate: 0.95, type: 'female' };
+                case 'gent_uk': return { pitch: 0.7, rate: 0.9, type: 'male' };
+                default: return { pitch: 1.0, rate: 1.0, type: 'female' };
+            }
+        }
+
+        function findBritishVoice(type) {
+            if(!gameVoices.length) return null;
+            const britVoices = gameVoices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
+            if (britVoices.length === 0) return null; 
+            if (type === 'male') {
+                return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
+            } else {
+                return britVoices.find(v => v.name.includes('Female') || v.name.includes('Hazel') || v.name.includes('Martha') || v.name.includes('Susan')) || britVoices[0];
+            }
+        }
+
+        function speak() { 
+            let u = new SpeechSynthesisUtterance(sentences[step]); 
+            let vParams = getVoiceConfig(cfg.voice);
+            let selected = findBritishVoice(vParams.type);
+            if(selected) u.voice = selected;
+            else u.lang = 'en-GB'; 
+            u.pitch = vParams.pitch;
+            u.rate = vParams.rate;
+            speechSynthesis.speak(u); 
+        }
+
+        function initLevel() {
+            if(step >= sentences.length) { finish(); return; }
+            document.getElementById('sc').innerHTML = ''; document.getElementById('bank').innerHTML = '';
+            document.getElementById('hc').innerText = sentences[step]; document.getElementById('hc').style.display = 'none';
+            clearInterval(tInt); tInt = null;
+            timeVal = cfg.timer.mode === 'down' ? parseInt(cfg.timer.val) : 0;
+            updateTimeDisplay();
+            document.getElementById('t-icon').innerText = cfg.timer.mode === 'down' ? '💣' : '⏳';
+
+            let words = sentences[step].split(/\\s+/);
+            words.forEach((w, i) => { const s = document.createElement('div'); s.className = 'slot'; s.id = 's'+i; document.getElementById('sc').appendChild(s); });
+            
+            let jarWords = [...words].sort(() => Math.random() - 0.5);
+            jarWords.forEach((w, i) => {
+                const c = document.createElement('div'); c.className = 'card'; c.innerText = w;
+                let row = Math.floor(i / 2); 
+                let col = i % 2;
+                c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; 
+                c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
+                
+                c.onclick = () => {
+                    if(!tInt) startTimer();
+                    if(cfg.assets.abg && (!audBG || audBG.paused)) { audBG = new Audio(cfg.assets.abg); audBG.loop = true; audBG.play(); }
+                    if(c.parentElement.id === 'bank') {
+                        const next = Array.from(document.querySelectorAll('.slot')).find(sl => !sl.firstChild);
+                        if(next) { next.appendChild(c); c.style.position='static'; score++; }
+                    } else { document.getElementById('bank').appendChild(c); c.style.position='absolute'; score--; }
+                    document.getElementById('sv').innerText = score;
+                };
+                document.getElementById('bank').appendChild(c);
+            });
+        }
+
+        function updateTimeDisplay() {
+            let m = Math.floor(timeVal/60), s = timeVal%60;
+            document.getElementById('tv').innerText = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+            if(cfg.timer.mode === 'down' && timeVal <= 10) document.getElementById('tv').style.color = 'red';
+            else document.getElementById('tv').style.color = 'white';
+        }
+
+        function startTimer() { 
+            if(tInt) clearInterval(tInt); 
+            tInt = setInterval(() => { 
+                if(cfg.timer.mode === 'down') {
+                    timeVal--;
+                    if(timeVal <= 0) { clearInterval(tInt); check(true); } 
+                } else {
+                    timeVal++;
+                }
+                updateTimeDisplay();
+            }, 1000); 
+        }
+
+        function spawnFX(mode) {
+            const count = mode === 'win' ? 120 : 50;
+            for(let i=0; i<count; i++) {
+                setTimeout(() => {
+                    const p = document.createElement('div'); p.className = 'fx-p';
+                    p.style.setProperty('--rx', (Math.random() * 500 - 250) + 'px');
+                    p.style.setProperty('--ry', (Math.random() * -400 - 100) + 'px');
+                    p.style.setProperty('--rs', (Math.random() * 1.5 + 0.5));
+                    p.style.width = p.style.height = (Math.random()*15+10)+'px';
+                    p.style.left = cfg.pot.x + '%'; p.style.top = topEdge + '%';
+                    if(mode === 'win') { p.style.background = ['#9b59b2','#2ecc71','#f1c40f','#e84393','#55efc4'][Math.floor(Math.random()*5)]; p.style.border="1px solid white"; }
+                    else { p.style.background = ['#ff4d4d','#ff944d','#ff1a1a'][Math.floor(Math.random()*3)]; p.style.boxShadow="0 0 10px orange"; }
+                    document.getElementById('gv').appendChild(p); setTimeout(()=>p.remove(), 2500);
+                }, i*8);
+            }
+        }
+
+        function check(isTimeout = false) {
+            let target = sentences[step].split(/\\s+/), ok = true;
+            target.forEach((w, i) => { const s = document.getElementById('s'+i); if(!s.firstChild || s.firstChild.innerText !== w) ok = false; });
+            
+            if (isTimeout && !ok) {
+                 if(cfg.assets.afail) new Audio(cfg.assets.afail).play();
+                 spawnFX('fail');
+                 alert('Время вышло! Попробуйте еще раз.');
+                 initLevel();
+                 return;
+            }
+
+            if(ok) {
+                if(cfg.assets.awin) new Audio(cfg.assets.awin).play(); spawnFX('win');
+                let pContent;
+                if(cfg.assets.customPrize && Math.random() > 0.5) {
+                    pContent = '<img src="'+cfg.assets.customPrize+'">';
+                } else {
+                    pContent = cfg.emojis[Math.floor(Math.random()*cfg.emojis.length)];
+                }
+                collected.push(pContent); 
+                showPrize(pContent);
+                setTimeout(() => { step++; initLevel(); }, 3000);
+            } else {
+                if(cfg.assets.afail) new Audio(cfg.assets.afail).play(); score -= 5; document.getElementById('sv').innerText = score;
+                spawnFX('fail'); const f = document.createElement('div'); f.className='f-red'; document.body.appendChild(f); setTimeout(()=>f.remove(), 500);
+                showPrize(cfg.failEmojis[Math.floor(Math.random()*cfg.failEmojis.length)]);
+            }
+        }
+
+        function showPrize(content) {
+            const e = document.createElement('div'); e.className='fly-e'; 
+            e.innerHTML = content;
+            e.style.left = cfg.pot.x + '%'; e.style.top = topEdge + '%';
+            e.style.setProperty('--rx', (Math.random() * 100 - 50) + 'px');
+            document.body.appendChild(e); setTimeout(()=>e.remove(), 2000);
+        }
+
+        function toggleHint() { const h = document.getElementById('hc'); h.style.display = h.style.display==='block'?'none':'block'; }
+        function finish() { clearInterval(tInt); document.getElementById('fin').style.display='flex'; document.getElementById('fs').innerText=score; document.getElementById('ft').innerText=document.getElementById('tv').innerText; document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); }
+        initLevel();
+    <\/script>
+</body>
+</html>`;
+
+        currentSource = finalHtml;
+        document.getElementById('code-output').value = `<iframe width="100%" height="100%" frameborder="0" srcdoc='${finalHtml.replace(/'/g, "&#39;")}'></iframe>`;
+        const blob = new Blob([finalHtml], { type: 'text/html' });
+        document.getElementById('live-frame').src = URL.createObjectURL(blob);
+    }
+
+    function copyCode() { document.getElementById('code-output').select(); document.execCommand('copy'); alert('Код скопирован!'); }
+    
+    function downloadGame() {
+        if(!currentSource) { alert('Сначала создайте игру!'); return; }
+        const blob = new Blob([currentSource], { type: 'text/html' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'magic-pot-game-brand.html';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    window.onload = updateCode;
+</script>
+</body>
+</html>
