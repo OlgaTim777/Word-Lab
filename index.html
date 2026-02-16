@@ -2,7 +2,7 @@
 <html lang='ru'>
 <head>
     <meta charset='UTF-8'>
-    <title>Magic Pot v6.2 - Branding Edition</title>
+    <title>Magic Pot v6.6 - Perfect Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; }
@@ -14,6 +14,7 @@
         
         .magic-box { background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(212, 175, 55, 0.3); }
         .magic-box label { font-size: 11px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; font-weight: bold; }
+        .magic-box .sub-label { font-size: 10px; color: #aaa; margin-bottom: 4px; margin-top: 8px; }
         
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
@@ -41,127 +42,162 @@
 <body>
 
 <div id='editor-panel'>
-    <h2>Magic Pot v6.2</h2>
+    <h2>Magic Pot v6.6</h2>
     
     <div class="btn-group">
-        <button class='btn-magic btn-copy' onclick='copyCode()'>📋 КОПИРОВАТЬ</button>
-        <button class='btn-magic btn-save' onclick='downloadGame()'>💾 СКАЧАТЬ HTML</button>
+        <button class='btn-magic btn-copy' onclick='copyCode()'>📋 КОПИРОВАТЬ КОД</button>
+        <button class='btn-magic btn-save' onclick='downloadGame()'>💾 СКАЧАТЬ ФАЙЛ</button>
     </div>
-    <textarea id='code-output' readonly placeholder="Код для вставки..."></textarea>
+    <textarea id='code-output' readonly placeholder="Код для Genially появится здесь..."></textarea>
 
     <div class='magic-box'>
-        <label>🏷️ ЛОГОТИП / БРЕНДИНГ</label>
-        <input type='file' accept="image/*" onchange='handleFile(this, "logo")' title="Загрузить лого">
+        <label>🏷️ БРЕНДИНГ (ЛОГОТИП)</label>
+        <div class="sub-label">Выберите файл логотипа:</div>
+        <input type='file' accept="image/*" onchange='handleFile(this, "logo")'>
         <div class='grid-2' style="margin-top:5px;">
-            <input type='number' id='l-w' value='100' title="Ширина (px)" oninput='updateCode()'>
-            <select id='l-shape' onchange='updateCode()' title="Форма логотипа">
-                <option value='0px'>Квадрат</option>
-                <option value='50%'>Круг</option>
-                <option value='20px'>Скругленный</option>
-            </select>
+            <div>
+                <div class="sub-label">Ширина (px):</div>
+                <input type='number' id='l-w' value='100' oninput='updateCode()'>
+            </div>
+            <div>
+                <div class="sub-label">Форма:</div>
+                <select id='l-shape' onchange='updateCode()'>
+                    <option value='0px'>Квадрат</option>
+                    <option value='50%'>Круг</option>
+                    <option value='20px'>Скругленный</option>
+                </select>
+            </div>
         </div>
         <div class='grid-2' style="margin-top:5px;">
-            <input type='number' id='l-x' value='92' title="Позиция X (%)" oninput='updateCode()'>
-            <input type='number' id='l-y' value='90' title="Позиция Y (%)" oninput='updateCode()'>
+            <div>
+                <div class="sub-label">Позиция X (%):</div>
+                <input type='number' id='l-x' value='92' oninput='updateCode()'>
+            </div>
+            <div>
+                <div class="sub-label">Позиция Y (%):</div>
+                <input type='number' id='l-y' value='90' oninput='updateCode()'>
+            </div>
         </div>
-        <div style="font-size:10px; color:#aaa; margin-top:3px;">X: % слева, Y: % сверху</div>
     </div>
 
     <div class='magic-box'>
-        <label>📝 ТЕКСТ УРОВНЕЙ</label>
+        <label>📝 ТЕКСТЫ И СЛОГАНЫ</label>
+        <div class="sub-label">Предложения (каждое с новой строки):</div>
         <textarea id='m-list' rows='3' oninput='updateCode()'>The red cat likes fish&#10;Magic potion is green</textarea>
+        
+        <div class="sub-label">Финальные фразы (через запятую):</div>
+        <textarea id='end-msgs' rows='2' oninput='updateCode()'>Великолепно! ✨, Настоящая магия! 🌟, Ты мастер зелий! 🧪</textarea>
     </div>
 
     <div class='magic-box'>
-        <label>🎁 ПРИЗЫ И ЭМОДЖИ</label>
+        <label>🎁 НАГРАДЫ И ОШИБКИ</label>
+        <div class="sub-label">Эмоджи призов (через запятую):</div>
         <input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'>
-        <div style="font-size:10px; color:#aaa; margin-top:5px;">Или картинка-приз:</div>
+        <div class="sub-label">Или своя картинка приза:</div>
         <input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'>
-        <div style="font-size:10px; color:#aaa; margin-top:5px;">Эмоджи ошибки:</div>
+        <div class="sub-label">Эмоджи ошибки (через запятую):</div>
         <input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'>
     </div>
 
     <div class='magic-box'>
         <label>🗣️ ОЗВУЧКА (BRITISH 🇬🇧)</label>
+        <div class="sub-label">Выберите голос:</div>
         <select id='v-preset' onchange='updateCode()'>
-            <option value="child_uk">🇬🇧 Child (Детский)</option>
-            <option value="teen_f_uk">🇬🇧 Teen Girl (Подросток-Д)</option>
-            <option value="teen_m_uk">🇬🇧 Teen Boy (Подросток-М)</option>
-            <option value="lady_uk">🇬🇧 Lady (Леди)</option>
-            <option value="gent_uk">🇬🇧 Gentleman (Джентльмен)</option>
+            <option value="child_uk">🇬🇧 Ребенок</option>
+            <option value="teen_f_uk">🇬🇧 Девушка</option>
+            <option value="teen_m_uk">🇬🇧 Парень</option>
+            <option value="lady_uk">🇬🇧 Леди</option>
+            <option value="gent_uk">🇬🇧 Джентльмен</option>
         </select>
-        <button class="btn-small" onclick="testVoice()">🔊 Test Voice (UK)</button>
+        <button class="btn-small" onclick="testVoice()">🔊 Проверить голос</button>
     </div>
 
     <div class='magic-box'>
         <label>⏱️ ТАЙМЕР</label>
         <div class='grid-2'>
-            <select id='t-mode' onchange='updateCode()'>
-                <option value='up'>Секундомер</option>
-                <option value='down'>Обратный отсчет</option>
-            </select>
-            <input type='number' id='t-lim' value='60' title="Секунды" oninput='updateCode()'>
+            <div>
+                <div class="sub-label">Режим:</div>
+                <select id='t-mode' onchange='updateCode()'>
+                    <option value='up'>Секундомер</option>
+                    <option value='down'>Обратный отсчет</option>
+                </select>
+            </div>
+            <div>
+                <div class="sub-label">Время (сек):</div>
+                <input type='number' id='t-lim' value='60' oninput='updateCode()'>
+            </div>
         </div>
     </div>
 
     <div class='magic-box'>
-        <label>🏺 КОТЕЛ (Позиция и Размер)</label>
+        <label>🏺 КАРТИНКА ПОЛЯ (КОТЕЛ)</label>
+        <div class="sub-label">Загрузить изображение поля:</div>
         <input type='file' accept="image/*" onchange='handleFile(this, "pot")' style="margin-bottom:5px;">
         <div class='grid-4'>
-            <input type='number' id='p-x' value='50' title="X %" oninput='updateCode()'>
-            <input type='number' id='p-y' value='65' title="Y %" oninput='updateCode()'>
-            <input type='number' id='p-w' value='70' title="Ширина %" oninput='updateCode()'>
-            <input type='number' id='p-h' value='50' title="Высота %" oninput='updateCode()'>
+            <div><div class="sub-label">X %</div><input type='number' id='p-x' value='50' oninput='updateCode()'></div>
+            <div><div class="sub-label">Y %</div><input type='number' id='p-y' value='65' oninput='updateCode()'></div>
+            <div><div class="sub-label">Шир %</div><input type='number' id='p-w' value='70' oninput='updateCode()'></div>
+            <div><div class="sub-label">Выс %</div><input type='number' id='p-h' value='50' oninput='updateCode()'></div>
         </div>
-    </div>
-
-    <div class='magic-box'>
-        <label>🧪 БАНОЧКИ (Размер и Расположение)</label>
-        <div class='grid-2' style="margin-bottom:5px;">
-             <input type='number' id='j-w' value='80' title="Ширина px" oninput='updateCode()'>
-             <input type='number' id='j-h' value='100' title="Высота px" oninput='updateCode()'>
-        </div>
-        <div class='grid-4'>
-            <input type='number' id='b-x' value='40' title="Start X" oninput='updateCode()'>
-            <input type='number' id='b-y' value='150' title="Start Y" oninput='updateCode()'>
-            <input type='number' id='b-gx' value='95' title="Gap X" oninput='updateCode()'>
-            <input type='number' id='b-gy' value='110' title="Gap Y" oninput='updateCode()'>
-        </div>
-    </div>
-
-    <div class='magic-box'>
-        <label>🎨 ДИЗАЙН ИГРЫ</label>
-        <input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
+        <div style="border-top:1px dashed #5a3e85; margin-top:10px; padding-top:5px; font-size:10px; color:var(--gold); font-weight:bold;">🔲 НАСТРОЙКА ЗОНЫ СЛОВ (ВНУТРИ ПОЛЯ)</div>
         <div class='grid-3' style="margin-top:5px;">
-            <input type='color' id='j-col' value='#ffffff' oninput='updateCode()'>
-            <input type='number' id='j-sz' value='16' title="Шрифт" oninput='updateCode()'>
-            <input type='number' id='j-off' value='0' title="Отступ" oninput='updateCode()'>
+            <div><div class="sub-label">Ширина %</div><input type='number' id='p-sw' value='85' oninput='updateCode()'></div>
+            <div><div class="sub-label">Верх. отступ</div><input type='number' id='p-st' value='40' oninput='updateCode()'></div>
+            <div><div class="sub-label">Интервал</div><input type='number' id='p-sg' value='10' oninput='updateCode()'></div>
         </div>
     </div>
 
     <div class='magic-box'>
-        <label>👾 ГЕРОЙ</label>
+        <label>🧪 КАРТОЧКИ (БАНОЧКИ)</label>
+        <div class="sub-label">Размер карточки (px):</div>
+        <div class='grid-2'>
+             <input type='number' id='j-w' value='80' title="Ширина" oninput='updateCode()'>
+             <input type='number' id='j-h' value='100' title="Высота" oninput='updateCode()'>
+        </div>
+        <div class="sub-label">Начальная позиция и разброс (px):</div>
+        <div class='grid-4'>
+            <div><div class="sub-label">Start X</div><input type='number' id='b-x' value='40' oninput='updateCode()'></div>
+            <div><div class="sub-label">Start Y</div><input type='number' id='b-y' value='150' oninput='updateCode()'></div>
+            <div><div class="sub-label">Шаг X</div><input type='number' id='b-gx' value='95' oninput='updateCode()'></div>
+            <div><div class="sub-label">Шаг Y</div><input type='number' id='b-gy' value='110' oninput='updateCode()'></div>
+        </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>👾 ПЕРСОНАЖ И ОБЛАКО</label>
+        <div class="sub-label">Картинка героя:</div>
         <input type='file' accept="image/*" onchange='handleFile(this, "hero")'>
         <div class='grid-3' style="margin-top:5px;">
-            <input type='number' id='h-s' value='25' oninput='updateCode()'>
-            <input type='number' id='h-x' value='80' oninput='updateCode()'>
-            <input type='number' id='h-y' value='45' oninput='updateCode()'>
+            <div><div class="sub-label">Разм %</div><input type='number' id='h-s' value='25' oninput='updateCode()'></div>
+            <div><div class="sub-label">Поз X%</div><input type='number' id='h-x' value='80' oninput='updateCode()'></div>
+            <div><div class="sub-label">Поз Y%</div><input type='number' id='h-y' value='45' oninput='updateCode()'></div>
         </div>
         <div class='grid-2' style="margin-top:5px;">
-            <input type='color' id='c-col' value='#000000'>
-            <input type='number' id='c-sz' value='18'>
+            <div><div class="sub-label">Цвет текста</div><input type='color' id='c-col' value='#000000' oninput='updateCode()'></div>
+            <div><div class="sub-label">Разм. шрифта</div><input type='number' id='c-sz' value='18' oninput='updateCode()'></div>
         </div>
     </div>
 
     <div class='magic-box'>
-        <label>🎵 ЗВУКИ И ФОН</label>
-        <div class='grid-2'>
-             <input type='file' accept="image/*" onchange='handleFile(this, "bg")' title="Фон">
-             <input type='file' accept="audio/*" onchange='handleFile(this, "abg")' title="Музыка">
+        <label>🎨 ОФОРМЛЕНИЕ ИГРЫ</label>
+        <div class="sub-label">Фон игры:</div>
+        <input type='file' accept="image/*" onchange='handleFile(this, "bg")' title="Фон">
+        <div class="sub-label">Вид карточки (баночка):</div>
+        <input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
+        <div class='grid-3' style="margin-top:5px;">
+            <div><div class="sub-label">Цвет</div><input type='color' id='j-col' value='#ffffff' oninput='updateCode()'></div>
+            <div><div class="sub-label">Шрифт</div><input type='number' id='j-sz' value='16' oninput='updateCode()'></div>
+            <div><div class="sub-label">Отступ</div><input type='number' id='j-off' value='0' oninput='updateCode()'></div>
         </div>
+    </div>
+
+    <div class='magic-box'>
+        <label>🎵 МУЗЫКА И ЭФФЕКТЫ</label>
+        <div class="sub-label">Фоновая музыка:</div>
+        <input type='file' accept="audio/*" onchange='handleFile(this, "abg")'>
         <div class='grid-2' style="margin-top:5px;">
-            <input type='file' accept="audio/*" onchange='handleFile(this, "awin")' title="Win">
-            <input type='file' accept="audio/*" onchange='handleFile(this, "afail")' title="Fail">
+            <div><div class="sub-label">Звук победы:</div><input type='file' accept="audio/*" onchange='handleFile(this, "awin")'></div>
+            <div><div class="sub-label">Звук ошибки:</div><input type='file' accept="audio/*" onchange='handleFile(this, "afail")'></div>
         </div>
     </div>
 </div>
@@ -174,7 +210,7 @@
         hero: "https://i.ibb.co/m5pXm6S/monster.png",
         pot: "https://i.imgur.com/eZ1HWGL.png",
         jar: "https://i.imgur.com/zn0Uxnh.png",
-        logo: "", // Пустой по умолчанию
+        logo: "", 
         customPrize: "",
         abg: "", 
         awin: "https://actions.google.com/sounds/v1/cartoon/clime_up_the_ladder.ogg",
@@ -197,8 +233,7 @@
     function findBritishVoice(type) {
         const voices = window.speechSynthesis.getVoices();
         const britVoices = voices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
-        if (britVoices.length === 0) return null; 
-        
+        if (britVoices.length === 0) return null;
         if (type === 'male') {
             return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
         } else {
@@ -228,11 +263,20 @@
     function updateCode() {
         const config = {
             m: document.getElementById('m-list').value,
+            slogans: document.getElementById('end-msgs').value.split(','),
             voice: document.getElementById('v-preset').value,
             timer: { mode: document.getElementById('t-mode').value, val: document.getElementById('t-lim').value },
             hero: { s: document.getElementById('h-s').value, x: document.getElementById('h-x').value, y: document.getElementById('h-y').value },
             cloud: { col: document.getElementById('c-col').value, sz: document.getElementById('c-sz').value },
-            pot: { w: document.getElementById('p-w').value, h: document.getElementById('p-h').value, x: document.getElementById('p-x').value, y: document.getElementById('p-y').value },
+            pot: { 
+                w: document.getElementById('p-w').value, 
+                h: document.getElementById('p-h').value, 
+                x: document.getElementById('p-x').value, 
+                y: document.getElementById('p-y').value,
+                sw: document.getElementById('p-sw').value,
+                st: document.getElementById('p-st').value,
+                sg: document.getElementById('p-sg').value
+            },
             jar: { w: document.getElementById('j-w').value, h: document.getElementById('j-h').value, col: document.getElementById('j-col').value, sz: document.getElementById('j-sz').value, off: document.getElementById('j-off').value },
             bank: { x: document.getElementById('b-x').value, y: document.getElementById('b-y').value, gx: document.getElementById('b-gx').value, gy: document.getElementById('b-gy').value },
             logo: { w: document.getElementById('l-w').value, x: document.getElementById('l-x').value, y: document.getElementById('l-y').value, shape: document.getElementById('l-shape').value },
@@ -253,7 +297,6 @@
         #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 30px; border: 2px solid gold; font-size: 22px; z-index: 100; font-weight: bold; }
         #spk { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; z-index: 100; filter: drop-shadow(0 0 5px white); }
         
-        /* LOGO STYLE */
         #game-logo {
             position: absolute;
             width: ${config.logo.w}px;
@@ -263,7 +306,7 @@
             border-radius: ${config.logo.shape};
             z-index: 95;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            pointer-events: none; /* Чтобы лого не мешало кликать */
+            pointer-events: none;
             object-fit: cover;
         }
 
@@ -272,14 +315,14 @@
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
         
         #hc { 
-            position: absolute; 
+            position: absolute;
             bottom: 110%; left: 50%; transform: translateX(-50%); 
             background: white; 
             color: ${config.cloud.col}; 
             font-size: ${config.cloud.sz}px; 
             font-weight: bold;
             padding: 15px 25px; 
-            border-radius: 40px; 
+            border-radius: 40px;
             display: none; 
             white-space: nowrap; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
@@ -290,7 +333,16 @@
         #hc::after { content:''; position:absolute; bottom:-20px; left:20%; width:10px; height:10px; background:white; border-radius:50%; box-shadow: -2px 2px 2px rgba(0,0,0,0.1); }
 
         #cz { position: absolute; width: ${config.pot.w}%; height: ${config.pot.h}%; left: ${config.pot.x}%; top: ${config.pot.y}%; transform: translate(-50%,-50%); background: url('${config.assets.pot}') center/contain no-repeat; display: flex; align-items: center; justify-content: center; z-index: 5; }
-        .slots { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 85%; margin-top: 40px; }
+        
+        .slots { 
+            display: flex; 
+            gap: ${config.pot.sg}px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
+            width: ${config.pot.sw}%; 
+            margin-top: ${config.pot.st}px; 
+        }
+        
         .slot { width: ${config.jar.w}px; height: ${config.jar.h}px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px; flex-shrink: 0; }
         
         #bank { position: absolute; inset: 0; pointer-events: none; }
@@ -316,6 +368,8 @@
         #fin { position: fixed; inset: 0; background: rgba(20, 10, 40, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: gold; text-align: center; }
         .gallery { display: flex; gap: 10px; margin-top: 20px; font-size: 45px; flex-wrap: wrap; justify-content: center; max-width: 80%; }
         .gallery img { width: 80px; height: 80px; object-fit: contain; }
+        #final-msg { font-size: 28px; color: #fff; margin: 10px 0 20px 0; font-family: 'Segoe UI', sans-serif; text-shadow: 0 0 10px gold; font-style: italic; opacity: 0; animation: fadeUp 1s ease-out 0.5s forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -330,8 +384,10 @@
             <button id="btn-check" class="game-btn" onclick="check()">CHECK</button>
             <button id="btn-reset" class="game-btn" onclick="initLevel()">RESET</button>
         </div>
+        
         <div id="fin">
-            <h1 style="font-family:Cinzel,serif; font-size:4em;">Level Complete!</h1>
+            <h1 style="font-family:Cinzel,serif; font-size:4em; margin-bottom: 0;">Level Complete!</h1>
+            <div id="final-msg"></div>
             <p style="font-size:24px;">Score: <span id="fs">0</span> | Time: <span id="ft">0</span></p>
             <div class="gallery" id="pg"></div>
             <button onclick="location.reload()" class="game-btn" style="background: gold; color: black; margin-top:30px; position:static;">PLAY AGAIN</button>
@@ -362,7 +418,7 @@
         function findBritishVoice(type) {
             if(!gameVoices.length) return null;
             const britVoices = gameVoices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
-            if (britVoices.length === 0) return null; 
+            if (britVoices.length === 0) return null;
             if (type === 'male') {
                 return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
             } else {
@@ -371,7 +427,7 @@
         }
 
         function speak() { 
-            let u = new SpeechSynthesisUtterance(sentences[step]); 
+            let u = new SpeechSynthesisUtterance(sentences[step]);
             let vParams = getVoiceConfig(cfg.voice);
             let selected = findBritishVoice(vParams.type);
             if(selected) u.voice = selected;
@@ -392,7 +448,6 @@
 
             let words = sentences[step].split(/\\s+/);
             words.forEach((w, i) => { const s = document.createElement('div'); s.className = 'slot'; s.id = 's'+i; document.getElementById('sc').appendChild(s); });
-            
             let jarWords = [...words].sort(() => Math.random() - 0.5);
             jarWords.forEach((w, i) => {
                 const c = document.createElement('div'); c.className = 'card'; c.innerText = w;
@@ -422,7 +477,7 @@
         }
 
         function startTimer() { 
-            if(tInt) clearInterval(tInt); 
+            if(tInt) clearInterval(tInt);
             tInt = setInterval(() => { 
                 if(cfg.timer.mode === 'down') {
                     timeVal--;
@@ -431,7 +486,7 @@
                     timeVal++;
                 }
                 updateTimeDisplay();
-            }, 1000); 
+            }, 1000);
         }
 
         function spawnFX(mode) {
@@ -454,7 +509,6 @@
         function check(isTimeout = false) {
             let target = sentences[step].split(/\\s+/), ok = true;
             target.forEach((w, i) => { const s = document.getElementById('s'+i); if(!s.firstChild || s.firstChild.innerText !== w) ok = false; });
-            
             if (isTimeout && !ok) {
                  if(cfg.assets.afail) new Audio(cfg.assets.afail).play();
                  spawnFX('fail');
@@ -464,7 +518,8 @@
             }
 
             if(ok) {
-                if(cfg.assets.awin) new Audio(cfg.assets.awin).play(); spawnFX('win');
+                if(cfg.assets.awin) new Audio(cfg.assets.awin).play();
+                spawnFX('win');
                 let pContent;
                 if(cfg.assets.customPrize && Math.random() > 0.5) {
                     pContent = '<img src="'+cfg.assets.customPrize+'">';
@@ -475,14 +530,16 @@
                 showPrize(pContent);
                 setTimeout(() => { step++; initLevel(); }, 3000);
             } else {
-                if(cfg.assets.afail) new Audio(cfg.assets.afail).play(); score -= 5; document.getElementById('sv').innerText = score;
+                if(cfg.assets.afail) new Audio(cfg.assets.afail).play();
+                score -= 5; document.getElementById('sv').innerText = score;
                 spawnFX('fail'); const f = document.createElement('div'); f.className='f-red'; document.body.appendChild(f); setTimeout(()=>f.remove(), 500);
                 showPrize(cfg.failEmojis[Math.floor(Math.random()*cfg.failEmojis.length)]);
             }
         }
 
         function showPrize(content) {
-            const e = document.createElement('div'); e.className='fly-e'; 
+            const e = document.createElement('div');
+            e.className='fly-e'; 
             e.innerHTML = content;
             e.style.left = cfg.pot.x + '%'; e.style.top = topEdge + '%';
             e.style.setProperty('--rx', (Math.random() * 100 - 50) + 'px');
@@ -490,13 +547,27 @@
         }
 
         function toggleHint() { const h = document.getElementById('hc'); h.style.display = h.style.display==='block'?'none':'block'; }
-        function finish() { clearInterval(tInt); document.getElementById('fin').style.display='flex'; document.getElementById('fs').innerText=score; document.getElementById('ft').innerText=document.getElementById('tv').innerText; document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); }
+        
+        function finish() { 
+            clearInterval(tInt); 
+            document.getElementById('fin').style.display='flex'; 
+            document.getElementById('fs').innerText=score; 
+            document.getElementById('ft').innerText=document.getElementById('tv').innerText; 
+            document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); 
+            
+            // Random Slogan Logic
+            const slogans = cfg.slogans.filter(s => s.trim() !== "");
+            if(slogans.length > 0) {
+                document.getElementById('final-msg').innerText = slogans[Math.floor(Math.random() * slogans.length)].trim();
+            }
+        }
         initLevel();
     <\/script>
 </body>
 </html>`;
 
         currentSource = finalHtml;
+        // ГЕНЕРАЦИЯ ДЛЯ GENIALLY (SINGLE QUOTES)
         document.getElementById('code-output').value = `<iframe width="100%" height="100%" frameborder="0" srcdoc='${finalHtml.replace(/'/g, "&#39;")}'></iframe>`;
         const blob = new Blob([finalHtml], { type: 'text/html' });
         document.getElementById('live-frame').src = URL.createObjectURL(blob);
@@ -509,7 +580,7 @@
         const blob = new Blob([currentSource], { type: 'text/html' });
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
-        link.download = 'magic-pot-game-brand.html';
+        link.download = 'magic-pot-v6.6.html';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
