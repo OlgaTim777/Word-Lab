@@ -2,16 +2,23 @@
 <html lang='ru'>
 <head>
     <meta charset='UTF-8'>
-    <title>Magic Pot v6.6 - Perfect Edition</title>
+    <title>Magic Pot v8.0 - Drag & Drop Visual Builder</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; }
+        :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; --tab-bg: #3e266b; --tab-active: #5a3e85; }
         * { box-sizing: border-box; user-select: none; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-dark); color: var(--text-light); display: flex; height: 100vh; overflow: hidden; }
         
-        #editor-panel { width: 440px; background: var(--panel-bg); padding: 20px; border-right: 3px solid var(--gold); overflow-y: auto; flex-shrink: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
-        h2 { margin: 0 0 15px 0; font-family: 'Cinzel', serif; color: var(--gold); text-align: center; letter-spacing: 2px; }
+        #editor-panel { width: 480px; background: var(--panel-bg); display: flex; flex-direction: column; border-right: 3px solid var(--gold); flex-shrink: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
+        h2 { margin: 15px 0; font-family: 'Cinzel', serif; color: var(--gold); text-align: center; letter-spacing: 2px; }
         
+        .tabs { display: flex; background: var(--tab-bg); border-bottom: 2px solid var(--gold); }
+        .tab-btn { flex: 1; padding: 10px 5px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
+        .tab-btn:hover { background: rgba(255,255,255,0.1); }
+        .tab-btn.active { background: var(--tab-active); color: var(--gold); border-bottom: 3px solid var(--gold); }
+        .tab-content { display: none; padding: 15px; overflow-y: auto; flex-grow: 1; }
+        .tab-content.active { display: block; }
+
         .magic-box { background: rgba(0, 0, 0, 0.4); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(212, 175, 55, 0.3); }
         .magic-box label { font-size: 11px; text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 8px; font-weight: bold; }
         .magic-box .sub-label { font-size: 10px; color: #aaa; margin-bottom: 4px; margin-top: 8px; }
@@ -21,183 +28,218 @@
         .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 5px; }
 
         input, textarea, select { width: 100%; padding: 6px; background: #120822; border: 1px solid #5a3e85; color: #fff; border-radius: 4px; font-size: 12px; outline: none; }
-        input:focus { border-color: var(--gold); }
+        input:focus, textarea:focus { border-color: var(--gold); }
         select { cursor: pointer; }
         
-        .btn-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        .btn-magic { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; color: #1a0b2e; font-weight: bold; font-family: 'Cinzel', serif; font-size: 13px; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-group { display: flex; gap: 10px; margin-bottom: 10px; }
+        .btn-magic { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; color: #1a0b2e; font-weight: bold; font-family: 'Cinzel', serif; font-size: 12px; transition: transform 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-magic:active { transform: scale(0.98); }
-        
         .btn-copy { background: var(--gold); }
         .btn-save { background: #4cd964; }
+        .btn-json { background: #00bcd4; color: #fff; }
         
-        .btn-small { padding: 8px; background: #5a3e85; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; margin-top: 5px; width: 100%; text-transform: uppercase; font-weight: bold; }
+        .btn-small { padding: 6px; background: #5a3e85; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; margin-top: 5px; text-transform: uppercase; font-weight: bold; }
         .btn-small:hover { background: #764abc; }
+        .btn-danger { background: #e74c3c; } .btn-danger:hover { background: #c0392b; }
+        
+        #code-output { height: 50px; font-family: monospace; color: #76ff03; border: 1px solid var(--gold); font-size: 10px; background: #000; margin-bottom: 10px; resize: none; overflow: hidden; }
+        #preview-area { flex-grow: 1; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
+        #live-frame { width: 100%; height: 100%; border: none; background: #000; position: absolute; top:0; left:0; }
 
-        #code-output { height: 60px; font-family: monospace; color: #76ff03; border: 1px solid var(--gold); font-size: 10px; overflow: hidden; background: #000; margin-bottom: 15px; }
-        #preview-area { flex-grow: 1; background: #000; position: relative; }
-        #live-frame { width: 100%; height: 100%; border: none; background: #000; }
+        .bank-item { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #5a3e85; }
+        .bank-item span { font-size: 12px; font-weight: bold; cursor: pointer; flex-grow: 1; }
+        .bank-actions { display: flex; gap: 5px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 0 15px; }
+        .lang-select { width: 100px; background: #000; border: 1px solid var(--gold); color: var(--gold); }
+        .section-div { border-top:1px dashed #5a3e85; margin-top:10px; padding-top:5px; font-size:10px; color:var(--gold); font-weight:bold; }
     </style>
 </head>
 <body>
 
 <div id='editor-panel'>
-    <h2>Magic Pot v6.6</h2>
-    
-    <div class="btn-group">
-        <button class='btn-magic btn-copy' onclick='copyCode()'>📋 КОПИРОВАТЬ КОД</button>
-        <button class='btn-magic btn-save' onclick='downloadGame()'>💾 СКАЧАТЬ ФАЙЛ</button>
-    </div>
-    <textarea id='code-output' readonly placeholder="Код для Genially появится здесь..."></textarea>
-
-    <div class='magic-box'>
-        <label>🏷️ БРЕНДИНГ (ЛОГОТИП)</label>
-        <div class="sub-label">Выберите файл логотипа:</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "logo")'>
-        <div class='grid-2' style="margin-top:5px;">
-            <div>
-                <div class="sub-label">Ширина (px):</div>
-                <input type='number' id='l-w' value='100' oninput='updateCode()'>
-            </div>
-            <div>
-                <div class="sub-label">Форма:</div>
-                <select id='l-shape' onchange='updateCode()'>
-                    <option value='0px'>Квадрат</option>
-                    <option value='50%'>Круг</option>
-                    <option value='20px'>Скругленный</option>
-                </select>
-            </div>
-        </div>
-        <div class='grid-2' style="margin-top:5px;">
-            <div>
-                <div class="sub-label">Позиция X (%):</div>
-                <input type='number' id='l-x' value='92' oninput='updateCode()'>
-            </div>
-            <div>
-                <div class="sub-label">Позиция Y (%):</div>
-                <input type='number' id='l-y' value='90' oninput='updateCode()'>
-            </div>
-        </div>
-    </div>
-
-    <div class='magic-box'>
-        <label>📝 ТЕКСТЫ И СЛОГАНЫ</label>
-        <div class="sub-label">Предложения (каждое с новой строки):</div>
-        <textarea id='m-list' rows='3' oninput='updateCode()'>The red cat likes fish&#10;Magic potion is green</textarea>
-        
-        <div class="sub-label">Финальные фразы (через запятую):</div>
-        <textarea id='end-msgs' rows='2' oninput='updateCode()'>Великолепно! ✨, Настоящая магия! 🌟, Ты мастер зелий! 🧪</textarea>
-    </div>
-
-    <div class='magic-box'>
-        <label>🎁 НАГРАДЫ И ОШИБКИ</label>
-        <div class="sub-label">Эмоджи призов (через запятую):</div>
-        <input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'>
-        <div class="sub-label">Или своя картинка приза:</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'>
-        <div class="sub-label">Эмоджи ошибки (через запятую):</div>
-        <input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'>
-    </div>
-
-    <div class='magic-box'>
-        <label>🗣️ ОЗВУЧКА (BRITISH 🇬🇧)</label>
-        <div class="sub-label">Выберите голос:</div>
-        <select id='v-preset' onchange='updateCode()'>
-            <option value="child_uk">🇬🇧 Ребенок</option>
-            <option value="teen_f_uk">🇬🇧 Девушка</option>
-            <option value="teen_m_uk">🇬🇧 Парень</option>
-            <option value="lady_uk">🇬🇧 Леди</option>
-            <option value="gent_uk">🇬🇧 Джентльмен</option>
+    <div class="top-bar">
+        <h2>Magic Pot v8.0</h2>
+        <select id="editor-lang" class="lang-select" onchange="changeLanguage()">
+            <option value="ru">🇷🇺 RU</option>
+            <option value="en">🇬🇧 EN</option>
+            <option value="de">🇩🇪 DE</option>
+            <option value="fr">🇫🇷 FR</option>
         </select>
-        <button class="btn-small" onclick="testVoice()">🔊 Проверить голос</button>
     </div>
 
-    <div class='magic-box'>
-        <label>⏱️ ТАЙМЕР</label>
-        <div class='grid-2'>
-            <div>
-                <div class="sub-label">Режим:</div>
-                <select id='t-mode' onchange='updateCode()'>
-                    <option value='up'>Секундомер</option>
-                    <option value='down'>Обратный отсчет</option>
-                </select>
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab-main')" data-i18n="tab_main">База</button>
+        <button class="tab-btn" onclick="openTab('tab-visuals')" data-i18n="tab_visuals">Визуал</button>
+        <button class="tab-btn" onclick="openTab('tab-mech')" data-i18n="tab_mech">Координаты</button>
+        <button class="tab-btn" onclick="openTab('tab-bank')" data-i18n="tab_bank">Память</button>
+    </div>
+
+    <!-- ТАБ 1: ТЕКСТЫ И ОСНОВА -->
+    <div id="tab-main" class="tab-content active">
+        <div class="btn-group">
+            <button class='btn-magic btn-copy' onclick='copyCode()' data-i18n="btn_copy">📋 КОПИРОВАТЬ</button>
+            <button class='btn-magic btn-save' onclick='downloadGame()' data-i18n="btn_download">💾 СКАЧАТЬ ФАЙЛ</button>
+        </div>
+        <textarea id='code-output' readonly placeholder="Код для Genially..."></textarea>
+
+        <div class='magic-box'>
+            <label data-i18n="lbl_texts">📝 ТЕКСТЫ И СЛОГАНЫ</label>
+            <div class="sub-label" data-i18n="lbl_sentences">Предложения (каждое с новой строки):</div>
+            <textarea id='m-list' rows='4' oninput='updateCode()'>The red cat likes fish&#10;Magic potion is green</textarea>
+            <div class="sub-label" data-i18n="lbl_final_msgs">Финальные фразы (через запятую):</div>
+            <textarea id='end-msgs' rows='2' oninput='updateCode()'>Великолепно! ✨, Настоящая магия! 🌟, Ты мастер зелий! 🧪</textarea>
+        </div>
+
+        <div class='magic-box'>
+            <label data-i18n="lbl_voice">🗣️ ОЗВУЧКА</label>
+            <select id='v-preset' onchange='updateCode()'>
+                <option value="child_uk">🇬🇧 Ребенок</option>
+                <option value="teen_f_uk">🇬🇧 Девушка</option>
+                <option value="teen_m_uk">🇬🇧 Парень</option>
+                <option value="lady_uk">🇬🇧 Леди</option>
+                <option value="gent_uk">🇬🇧 Джентльмен</option>
+            </select>
+            <button class="btn-small" onclick="testVoice()" data-i18n="btn_test_voice" style="width:100%">🔊 Проверить голос</button>
+        </div>
+
+        <div class='magic-box'>
+            <label data-i18n="lbl_timer">⏱️ ТАЙМЕР</label>
+            <div class='grid-2'>
+                <div>
+                    <select id='t-mode' onchange='updateCode()'>
+                        <option value='up' data-i18n="opt_stopwatch">Секундомер</option>
+                        <option value='down' data-i18n="opt_countdown">Отсчет</option>
+                    </select>
+                </div>
+                <div><input type='number' id='t-lim' value='60' oninput='updateCode()'></div>
             </div>
-            <div>
-                <div class="sub-label">Время (сек):</div>
-                <input type='number' id='t-lim' value='60' oninput='updateCode()'>
+        </div>
+    </div>
+
+    <!-- ТАБ 2: ВИЗУАЛ (КАРТИНКИ И ЦВЕТА) -->
+    <div id="tab-visuals" class="tab-content">
+        <div class='magic-box'>
+            <label data-i18n="lbl_branding">🏷️ БРЕНДИНГ (ЛОГО)</label>
+            <input type='file' accept="image/*" onchange='handleFile(this, "logo")'>
+            <div class='grid-2' style="margin-top:5px;">
+                <div><div class="sub-label">Ширина (px):</div><input type='number' id='l-w' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Форма:</div>
+                    <select id='l-shape' onchange='updateCode()'>
+                        <option value='0px'>Квадрат</option><option value='50%'>Круг</option><option value='20px'>Скругленный</option>
+                    </select>
+                </div>
+                <div><div class="sub-label">Поз X (%):</div><input type='number' id='l-x' value='92' oninput='updateCode()'></div>
+                <div><div class="sub-label">Поз Y (%):</div><input type='number' id='l-y' value='90' oninput='updateCode()'></div>
             </div>
         </div>
-    </div>
 
-    <div class='magic-box'>
-        <label>🏺 КАРТИНКА ПОЛЯ (КОТЕЛ)</label>
-        <div class="sub-label">Загрузить изображение поля:</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "pot")' style="margin-bottom:5px;">
-        <div class='grid-4'>
-            <div><div class="sub-label">X %</div><input type='number' id='p-x' value='50' oninput='updateCode()'></div>
-            <div><div class="sub-label">Y %</div><input type='number' id='p-y' value='65' oninput='updateCode()'></div>
-            <div><div class="sub-label">Шир %</div><input type='number' id='p-w' value='70' oninput='updateCode()'></div>
-            <div><div class="sub-label">Выс %</div><input type='number' id='p-h' value='50' oninput='updateCode()'></div>
+        <div class='magic-box'>
+            <label data-i18n="lbl_design">🎨 ОФОРМЛЕНИЕ ИГРЫ</label>
+            <div class="sub-label">Фон игры:</div><input type='file' accept="image/*" onchange='handleFile(this, "bg")'>
+            <div class="sub-label">Картинка котла:</div><input type='file' accept="image/*" onchange='handleFile(this, "pot")'>
+            <div class="sub-label">Вид карточки:</div><input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
+            <div class='grid-2' style="margin-top:5px;">
+                <div><div class="sub-label">Цвет текста банок</div><input type='color' id='j-col' value='#ffffff' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шрифт банок</div><input type='number' id='j-sz' value='16' oninput='updateCode()'></div>
+            </div>
         </div>
-        <div style="border-top:1px dashed #5a3e85; margin-top:10px; padding-top:5px; font-size:10px; color:var(--gold); font-weight:bold;">🔲 НАСТРОЙКА ЗОНЫ СЛОВ (ВНУТРИ ПОЛЯ)</div>
-        <div class='grid-3' style="margin-top:5px;">
-            <div><div class="sub-label">Ширина %</div><input type='number' id='p-sw' value='85' oninput='updateCode()'></div>
-            <div><div class="sub-label">Верх. отступ</div><input type='number' id='p-st' value='40' oninput='updateCode()'></div>
-            <div><div class="sub-label">Интервал</div><input type='number' id='p-sg' value='10' oninput='updateCode()'></div>
-        </div>
-    </div>
 
-    <div class='magic-box'>
-        <label>🧪 КАРТОЧКИ (БАНОЧКИ)</label>
-        <div class="sub-label">Размер карточки (px):</div>
-        <div class='grid-2'>
-             <input type='number' id='j-w' value='80' title="Ширина" oninput='updateCode()'>
-             <input type='number' id='j-h' value='100' title="Высота" oninput='updateCode()'>
+        <div class='magic-box'>
+            <label data-i18n="lbl_hero">👾 ПЕРСОНАЖ И ОБЛАКО</label>
+            <input type='file' accept="image/*" onchange='handleFile(this, "hero")'>
+            <div class='grid-2' style="margin-top:5px;">
+                <div><div class="sub-label">Цвет облака</div><input type='color' id='c-col' value='#000000' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шрифт облака</div><input type='number' id='c-sz' value='18' oninput='updateCode()'></div>
+            </div>
         </div>
-        <div class="sub-label">Начальная позиция и разброс (px):</div>
-        <div class='grid-4'>
-            <div><div class="sub-label">Start X</div><input type='number' id='b-x' value='40' oninput='updateCode()'></div>
-            <div><div class="sub-label">Start Y</div><input type='number' id='b-y' value='150' oninput='updateCode()'></div>
-            <div><div class="sub-label">Шаг X</div><input type='number' id='b-gx' value='95' oninput='updateCode()'></div>
-            <div><div class="sub-label">Шаг Y</div><input type='number' id='b-gy' value='110' oninput='updateCode()'></div>
+
+        <div class='magic-box'>
+            <label data-i18n="lbl_audio">🎵 МУЗЫКА И ЭФФЕКТЫ</label>
+            <div class="sub-label">Фон:</div><input type='file' accept="audio/*" onchange='handleFile(this, "abg")'>
+            <div class="sub-label">Победа:</div><input type='file' accept="audio/*" onchange='handleFile(this, "awin")'>
+            <div class="sub-label">Ошибка:</div><input type='file' accept="audio/*" onchange='handleFile(this, "afail")'>
         </div>
     </div>
 
-    <div class='magic-box'>
-        <label>👾 ПЕРСОНАЖ И ОБЛАКО</label>
-        <div class="sub-label">Картинка героя:</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "hero")'>
-        <div class='grid-3' style="margin-top:5px;">
-            <div><div class="sub-label">Разм %</div><input type='number' id='h-s' value='25' oninput='updateCode()'></div>
-            <div><div class="sub-label">Поз X%</div><input type='number' id='h-x' value='80' oninput='updateCode()'></div>
-            <div><div class="sub-label">Поз Y%</div><input type='number' id='h-y' value='45' oninput='updateCode()'></div>
+    <!-- ТАБ 3: НАСТРОЙКИ СЕТКИ И ПОЗИЦИЙ (АВТОМАТИЗИРОВАНО ЧЕРЕЗ DND) -->
+    <div id="tab-mech" class="tab-content">
+        <div class="section-div" style="margin-top:0;">📍 Можно менять мышью прямо на экране игры!</div>
+        <div class='magic-box'>
+            <label>🎮 ОСНОВНЫЕ ЭЛЕМЕНТЫ (%)</label>
+            <div class='grid-4'>
+                <div><div class="sub-label">Счетчик X</div><input type='number' id='ui-x' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Счетчик Y</div><input type='number' id='ui-y' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Таймер X</div><input type='number' id='tm-x' value='18' oninput='updateCode()'></div>
+                <div><div class="sub-label">Таймер Y</div><input type='number' id='tm-y' value='5' oninput='updateCode()'></div>
+                
+                <div><div class="sub-label">Звук X</div><input type='number' id='spk-x' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Звук Y</div><input type='number' id='spk-y' value='5' oninput='updateCode()'></div>
+                
+                <div><div class="sub-label">Герой X</div><input type='number' id='h-x' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Герой Y</div><input type='number' id='h-y' value='45' oninput='updateCode()'></div>
+                
+                <div><div class="sub-label">Котел X</div><input type='number' id='p-x' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Y</div><input type='number' id='p-y' value='65' oninput='updateCode()'></div>
+                
+                <div><div class="sub-label">Размер Героя</div><input type='number' id='h-s' value='25' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Шир.</div><input type='number' id='p-w' value='70' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Выс.</div><input type='number' id='p-h' value='50' oninput='updateCode()'></div>
+            </div>
         </div>
-        <div class='grid-2' style="margin-top:5px;">
-            <div><div class="sub-label">Цвет текста</div><input type='color' id='c-col' value='#000000' oninput='updateCode()'></div>
-            <div><div class="sub-label">Разм. шрифта</div><input type='number' id='c-sz' value='18' oninput='updateCode()'></div>
+
+        <div class='magic-box'>
+            <label>🏺 ВНУТРЕННОСТИ КОТЛА</label>
+            <div class='grid-4'>
+                <div><div class="sub-label">Зона X (%)</div><input type='number' id='s-x' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Зона Y (%)</div><input type='number' id='s-y' value='60' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шир.Слота px</div><input type='number' id='s-w' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Выс.Слота px</div><input type='number' id='s-h' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Отступ(Gap) px</div><input type='number' id='p-sg' value='10' oninput='updateCode()'></div>
+            </div>
+        </div>
+
+        <div class='magic-box'>
+            <label>🧪 БАНОЧКИ И ТЕКСТ В НИХ</label>
+            <div class='grid-4'>
+                <div><div class="sub-label">Ширина (px)</div><input type='number' id='j-w' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Высота (px)</div><input type='number' id='j-h' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Текст X (%)</div><input type='number' id='j-tx' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Текст Y (%)</div><input type='number' id='j-ty' value='50' oninput='updateCode()'></div>
+            </div>
+            <div class="section-div">РАСПРЕДЕЛЕНИЕ БАНОК (PX)</div>
+            <div class='grid-4'>
+                <div><div class="sub-label">Start X (px)</div><input type='number' id='b-x' value='40' oninput='updateCode()'></div>
+                <div><div class="sub-label">Start Y (px)</div><input type='number' id='b-y' value='150' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шаг X</div><input type='number' id='b-gx' value='95' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шаг Y</div><input type='number' id='b-gy' value='110' oninput='updateCode()'></div>
+            </div>
+        </div>
+        
+        <div class='magic-box'>
+            <label data-i18n="lbl_rewards">🎁 ЭМОДЖИ</label>
+            <div class="sub-label">Призы:</div><input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'>
+            <div class="sub-label">Или картинка:</div><input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'>
+            <div class="sub-label">Ошибки:</div><input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'>
         </div>
     </div>
 
-    <div class='magic-box'>
-        <label>🎨 ОФОРМЛЕНИЕ ИГРЫ</label>
-        <div class="sub-label">Фон игры:</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "bg")' title="Фон">
-        <div class="sub-label">Вид карточки (баночка):</div>
-        <input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
-        <div class='grid-3' style="margin-top:5px;">
-            <div><div class="sub-label">Цвет</div><input type='color' id='j-col' value='#ffffff' oninput='updateCode()'></div>
-            <div><div class="sub-label">Шрифт</div><input type='number' id='j-sz' value='16' oninput='updateCode()'></div>
-            <div><div class="sub-label">Отступ</div><input type='number' id='j-off' value='0' oninput='updateCode()'></div>
+    <!-- ТАБ 4: БАЗА ИГР -->
+    <div id="tab-bank" class="tab-content">
+        <div class="btn-group">
+            <button class="btn-magic btn-json" onclick="exportJSON()" data-i18n="btn_exp_json">⬇️ ЭКСПОРТ JSON</button>
+            <button class="btn-magic btn-json" onclick="document.getElementById('json-import').click()" data-i18n="btn_imp_json">⬆️ ИМПОРТ JSON</button>
+            <input type="file" id="json-import" accept=".json" style="display:none;" onchange="importJSON(this)">
         </div>
-    </div>
-
-    <div class='magic-box'>
-        <label>🎵 МУЗЫКА И ЭФФЕКТЫ</label>
-        <div class="sub-label">Фоновая музыка:</div>
-        <input type='file' accept="audio/*" onchange='handleFile(this, "abg")'>
-        <div class='grid-2' style="margin-top:5px;">
-            <div><div class="sub-label">Звук победы:</div><input type='file' accept="audio/*" onchange='handleFile(this, "awin")'></div>
-            <div><div class="sub-label">Звук ошибки:</div><input type='file' accept="audio/*" onchange='handleFile(this, "afail")'></div>
+        <div class="magic-box">
+            <label data-i18n="lbl_save_bank">💾 СОХРАНИТЬ В ПАМЯТЬ БРАУЗЕРА</label>
+            <div class="grid-2">
+                <input type="text" id="bank-name" placeholder="Название игры...">
+                <button class="btn-small" onclick="saveToBank()" style="margin:0;" data-i18n="btn_save">Сохранить</button>
+            </div>
+        </div>
+        <div class="magic-box">
+            <label data-i18n="lbl_my_games">📁 МОИ ИГРЫ</label>
+            <div id="bank-list"></div>
         </div>
     </div>
 </div>
@@ -205,85 +247,137 @@
 <div id='preview-area'><iframe id="live-frame"></iframe></div>
 
 <script>
+    const dict = {
+        ru: { tab_main: "База", tab_visuals: "Визуал", tab_mech: "Координаты", tab_bank: "Память", btn_copy: "📋 КОПИРОВАТЬ", btn_download: "💾 СКАЧАТЬ ФАЙЛ", btn_test_voice: "🔊 Проверить голос", lbl_texts: "📝 ТЕКСТЫ И СЛОГАНЫ", lbl_sentences: "Предложения:", lbl_final_msgs: "Финальные фразы:", lbl_voice: "🗣️ ОЗВУЧКА", lbl_branding: "🏷️ БРЕНДИНГ", lbl_design: "🎨 ОФОРМЛЕНИЕ", lbl_hero: "👾 ПЕРСОНАЖ", lbl_timer: "⏱️ ТАЙМЕР", opt_stopwatch: "Секундомер", opt_countdown: "Отсчет", lbl_rewards: "🎁 НАГРАДЫ И ОШИБКИ", lbl_audio: "🎵 МУЗЫКА И ЭФФЕКТЫ", btn_exp_json: "⬇️ ЭКСПОРТ JSON", btn_imp_json: "⬆️ ИМПОРТ JSON", lbl_save_bank: "💾 СОХРАНИТЬ", btn_save: "Сохранить", lbl_my_games: "📁 МОИ ИГРЫ", g_check: "ПРОВЕРИТЬ", g_reset: "СБРОС", g_complete: "Уровень пройден!", g_score: "Очки: ", g_time: "Время: ", g_again: "ИГРАТЬ СНОВА", g_timeout: "Время вышло!" },
+        en: { tab_main: "Base", tab_visuals: "Visuals", tab_mech: "Coords", tab_bank: "Memory", btn_copy: "📋 COPY CODE", btn_download: "💾 DOWNLOAD", btn_test_voice: "🔊 Test Voice", lbl_texts: "📝 TEXTS & SLOGANS", lbl_sentences: "Sentences:", lbl_final_msgs: "Final Messages:", lbl_voice: "🗣️ VOICEOVER", lbl_branding: "🏷️ BRANDING", lbl_design: "🎨 DESIGN", lbl_hero: "👾 HERO", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stopwatch", opt_countdown: "Countdown", lbl_rewards: "🎁 REWARDS", lbl_audio: "🎵 AUDIO & FX", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAVE", btn_save: "Save", lbl_my_games: "📁 MY GAMES", g_check: "CHECK", g_reset: "RESET", g_complete: "Level Complete!", g_score: "Score: ", g_time: "Time: ", g_again: "PLAY AGAIN", g_timeout: "Time is up!" }
+    };
+
+    function changeLanguage() {
+        const lang = document.getElementById('editor-lang').value;
+        const d = dict[lang] || dict['en'];
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            if (d[key]) { if (el.tagName === 'INPUT' && el.type === 'button') el.value = d[key]; else el.innerText = d[key]; }
+        });
+        updateCode();
+    }
+
+    function openTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
     let assets = {
-        bg: "https://i.imgur.com/UEU5VeO.jpeg",
-        hero: "https://i.ibb.co/m5pXm6S/monster.png",
-        pot: "https://i.imgur.com/eZ1HWGL.png",
-        jar: "https://i.imgur.com/zn0Uxnh.png",
-        logo: "", 
-        customPrize: "",
-        abg: "", 
+        bg: "https://i.imgur.com/UEU5VeO.jpeg", hero: "https://i.ibb.co/m5pXm6S/monster.png",
+        pot: "https://i.imgur.com/eZ1HWGL.png", jar: "https://i.imgur.com/zn0Uxnh.png",
+        logo: "", customPrize: "", abg: "", 
         awin: "https://actions.google.com/sounds/v1/cartoon/clime_up_the_ladder.ogg",
         afail: "https://actions.google.com/sounds/v1/cartoon/boing.ogg"
     };
 
     let currentSource = "";
-
-    function getVoiceConfig(preset) {
-        switch(preset) {
-            case 'child_uk': return { pitch: 1.6, rate: 1.1, type: 'female' };
-            case 'teen_f_uk': return { pitch: 1.2, rate: 1.1, type: 'female' };
-            case 'teen_m_uk': return { pitch: 1.1, rate: 1.15, type: 'male' };
-            case 'lady_uk': return { pitch: 1.0, rate: 0.95, type: 'female' };
-            case 'gent_uk': return { pitch: 0.7, rate: 0.9, type: 'male' };
-            default: return { pitch: 1.0, rate: 1.0, type: 'female' };
-        }
-    }
-
-    function findBritishVoice(type) {
-        const voices = window.speechSynthesis.getVoices();
-        const britVoices = voices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
-        if (britVoices.length === 0) return null;
-        if (type === 'male') {
-            return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
-        } else {
-            return britVoices.find(v => v.name.includes('Female') || v.name.includes('Hazel') || v.name.includes('Martha') || v.name.includes('Susan')) || britVoices[0];
-        }
-    }
-
-    function testVoice() {
-        const preset = document.getElementById('v-preset').value;
-        const cfg = getVoiceConfig(preset);
-        let msg = new SpeechSynthesisUtterance("Hello! This is a proper British English test.");
-        const selected = findBritishVoice(cfg.type);
-        if(selected) msg.voice = selected; else msg.lang = 'en-GB';
-        msg.pitch = cfg.pitch;
-        msg.rate = cfg.rate;
-        window.speechSynthesis.speak(msg);
-    }
-
-    function handleFile(input, key) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = (e) => { assets[key] = e.target.result; updateCode(); };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function updateCode() {
-        const config = {
-            m: document.getElementById('m-list').value,
-            slogans: document.getElementById('end-msgs').value.split(','),
+    
+    function buildConfigObject() {
+        return {
+            m: document.getElementById('m-list').value, slogans: document.getElementById('end-msgs').value.split(','),
             voice: document.getElementById('v-preset').value,
             timer: { mode: document.getElementById('t-mode').value, val: document.getElementById('t-lim').value },
             hero: { s: document.getElementById('h-s').value, x: document.getElementById('h-x').value, y: document.getElementById('h-y').value },
             cloud: { col: document.getElementById('c-col').value, sz: document.getElementById('c-sz').value },
+            ui: { x: document.getElementById('ui-x').value, y: document.getElementById('ui-y').value, tx: document.getElementById('tm-x').value, ty: document.getElementById('tm-y').value, sx: document.getElementById('spk-x').value, sy: document.getElementById('spk-y').value },
             pot: { 
-                w: document.getElementById('p-w').value, 
-                h: document.getElementById('p-h').value, 
-                x: document.getElementById('p-x').value, 
-                y: document.getElementById('p-y').value,
-                sw: document.getElementById('p-sw').value,
-                st: document.getElementById('p-st').value,
-                sg: document.getElementById('p-sg').value
+                w: document.getElementById('p-w').value, h: document.getElementById('p-h').value, x: document.getElementById('p-x').value, y: document.getElementById('p-y').value,
+                sx: document.getElementById('s-x').value, sy: document.getElementById('s-y').value,
+                sw: document.getElementById('s-w').value, sh: document.getElementById('s-h').value, sg: document.getElementById('p-sg').value
             },
-            jar: { w: document.getElementById('j-w').value, h: document.getElementById('j-h').value, col: document.getElementById('j-col').value, sz: document.getElementById('j-sz').value, off: document.getElementById('j-off').value },
+            jar: { w: document.getElementById('j-w').value, h: document.getElementById('j-h').value, col: document.getElementById('j-col').value, sz: document.getElementById('j-sz').value, tx: document.getElementById('j-tx').value, ty: document.getElementById('j-ty').value },
             bank: { x: document.getElementById('b-x').value, y: document.getElementById('b-y').value, gx: document.getElementById('b-gx').value, gy: document.getElementById('b-gy').value },
             logo: { w: document.getElementById('l-w').value, x: document.getElementById('l-x').value, y: document.getElementById('l-y').value, shape: document.getElementById('l-shape').value },
-            assets: assets,
-            emojis: document.getElementById('prize-emojis').value.split(','),
-            failEmojis: document.getElementById('fail-emojis').value.split(',')
+            assets: assets, emojis: document.getElementById('prize-emojis').value.split(','), failEmojis: document.getElementById('fail-emojis').value.split(',')
         };
+    }
+
+    function applyConfigObject(c) {
+        if(!c) return;
+        if(c.m !== undefined) document.getElementById('m-list').value = c.m;
+        if(c.slogans) document.getElementById('end-msgs').value = Array.isArray(c.slogans) ? c.slogans.join(',') : c.slogans;
+        if(c.voice) document.getElementById('v-preset').value = c.voice;
+        
+        if(c.timer) { if(c.timer.mode) document.getElementById('t-mode').value = c.timer.mode; if(c.timer.val) document.getElementById('t-lim').value = c.timer.val; }
+        if(c.hero) { if(c.hero.s) document.getElementById('h-s').value = c.hero.s; if(c.hero.x) document.getElementById('h-x').value = c.hero.x; if(c.hero.y) document.getElementById('h-y').value = c.hero.y; }
+        if(c.cloud) { if(c.cloud.col) document.getElementById('c-col').value = c.cloud.col; if(c.cloud.sz) document.getElementById('c-sz').value = c.cloud.sz; }
+        if(c.ui) { 
+            if(c.ui.x) document.getElementById('ui-x').value = c.ui.x; if(c.ui.y) document.getElementById('ui-y').value = c.ui.y; 
+            if(c.ui.tx) document.getElementById('tm-x').value = c.ui.tx; if(c.ui.ty) document.getElementById('tm-y').value = c.ui.ty; 
+            if(c.ui.sx) document.getElementById('spk-x').value = c.ui.sx; if(c.ui.sy) document.getElementById('spk-y').value = c.ui.sy; 
+        }
+        if(c.pot) {
+            if(c.pot.w) document.getElementById('p-w').value = c.pot.w; if(c.pot.h) document.getElementById('p-h').value = c.pot.h;
+            if(c.pot.x) document.getElementById('p-x').value = c.pot.x; if(c.pot.y) document.getElementById('p-y').value = c.pot.y;
+            if(c.pot.sx !== undefined) document.getElementById('s-x').value = c.pot.sx; if(c.pot.sy !== undefined) document.getElementById('s-y').value = c.pot.sy;
+            if(c.pot.sw !== undefined) document.getElementById('s-w').value = c.pot.sw; if(c.pot.sh !== undefined) document.getElementById('s-h').value = c.pot.sh;
+            if(c.pot.sg !== undefined) document.getElementById('p-sg').value = c.pot.sg;
+        }
+        if(c.jar) {
+            if(c.jar.w) document.getElementById('j-w').value = c.jar.w; if(c.jar.h) document.getElementById('j-h').value = c.jar.h;
+            if(c.jar.col) document.getElementById('j-col').value = c.jar.col; if(c.jar.sz) document.getElementById('j-sz').value = c.jar.sz;
+            if(c.jar.tx !== undefined) document.getElementById('j-tx').value = c.jar.tx; if(c.jar.ty !== undefined) document.getElementById('j-ty').value = c.jar.ty;
+        }
+        if(c.bank) {
+            if(c.bank.x) document.getElementById('b-x').value = c.bank.x; if(c.bank.y) document.getElementById('b-y').value = c.bank.y;
+            if(c.bank.gx) document.getElementById('b-gx').value = c.bank.gx; if(c.bank.gy) document.getElementById('b-gy').value = c.bank.gy;
+        }
+        if(c.logo) {
+            if(c.logo.w) document.getElementById('l-w').value = c.logo.w; if(c.logo.x) document.getElementById('l-x').value = c.logo.x;
+            if(c.logo.y) document.getElementById('l-y').value = c.logo.y; if(c.logo.shape) document.getElementById('l-shape').value = c.logo.shape;
+        }
+        if(c.emojis) document.getElementById('prize-emojis').value = Array.isArray(c.emojis) ? c.emojis.join(',') : c.emojis;
+        if(c.failEmojis) document.getElementById('fail-emojis').value = Array.isArray(c.failEmojis) ? c.failEmojis.join(',') : c.failEmojis;
+        if(c.assets) assets = c.assets;
+    }
+
+    function loadBank() {
+        const bank = JSON.parse(localStorage.getItem('magicPotBank')) || {};
+        const list = document.getElementById('bank-list'); list.innerHTML = '';
+        for(let key in bank) {
+            list.innerHTML += `<div class="bank-item"><span onclick="loadFromBank('${key}')">${key}</span><div class="bank-actions"><button class="btn-small" onclick="renameBankItem('${key}')">✏️</button><button class="btn-small btn-danger" onclick="deleteBankItem('${key}')">✖</button></div></div>`;
+        }
+    }
+    function saveToBank() {
+        const name = document.getElementById('bank-name').value.trim();
+        if(!name) return alert("Введите название!");
+        const bank = JSON.parse(localStorage.getItem('magicPotBank')) || {};
+        bank[name] = buildConfigObject(); localStorage.setItem('magicPotBank', JSON.stringify(bank)); document.getElementById('bank-name').value = ''; loadBank();
+    }
+    function loadFromBank(key) { const bank = JSON.parse(localStorage.getItem('magicPotBank')) || {}; if(bank[key]) { applyConfigObject(bank[key]); updateCode(); } }
+    function renameBankItem(oldKey) { const newKey = prompt("Новое название:", oldKey); if(newKey && newKey.trim() !== "" && newKey !== oldKey) { const bank = JSON.parse(localStorage.getItem('magicPotBank')) || {}; bank[newKey] = bank[oldKey]; delete bank[oldKey]; localStorage.setItem('magicPotBank', JSON.stringify(bank)); loadBank(); } }
+    function deleteBankItem(key) { if(confirm(`Удалить ${key}?`)) { const bank = JSON.parse(localStorage.getItem('magicPotBank')) || {}; delete bank[key]; localStorage.setItem('magicPotBank', JSON.stringify(bank)); loadBank(); } }
+    function exportJSON() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(buildConfigObject())); const a = document.createElement('a'); a.href = dataStr; a.download = "magic_pot.json"; a.click(); }
+    function importJSON(input) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = (e) => { try { applyConfigObject(JSON.parse(e.target.result)); updateCode(); } catch(err) { alert("Ошибка JSON!"); } }; reader.readAsText(input.files[0]); } input.value = ''; }
+    function handleFile(input, key) { if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = (e) => { assets[key] = e.target.result; updateCode(); }; reader.readAsDataURL(input.files[0]); } }
+    
+    // Синхронизация Drag and Drop из iframe (Обновляет инпуты без перезагрузки экрана)
+    window.addEventListener('message', (e) => {
+        if (e.data.type === 'posUpdate') {
+            const { id, x, y } = e.data;
+            if (id === 'hr') { document.getElementById('h-x').value = x; document.getElementById('h-y').value = y; }
+            if (id === 'cz') { document.getElementById('p-x').value = x; document.getElementById('p-y').value = y; }
+            if (id === 'ui-score') { document.getElementById('ui-x').value = x; document.getElementById('ui-y').value = y; }
+            if (id === 'ui-timer') { document.getElementById('tm-x').value = x; document.getElementById('tm-y').value = y; }
+            if (id === 'spk-wrap') { document.getElementById('spk-x').value = x; document.getElementById('spk-y').value = y; }
+            if (id === 'bank-handle') { document.getElementById('b-x').value = x; document.getElementById('b-y').value = y; }
+            if (id === 'sc') { document.getElementById('s-x').value = x; document.getElementById('s-y').value = y; }
+            if (id.startsWith('jar-text')) { document.getElementById('j-tx').value = x; document.getElementById('j-ty').value = y; }
+            updateCode(true); // Сохраняем код, но не перезагружаем iframe для плавности!
+        }
+    });
+
+    function updateCode(skipIframe = false) {
+        const config = buildConfigObject();
+        const lang = document.getElementById('editor-lang').value;
+        const gDict = dict[lang] || dict['ru'];
 
         const finalHtml = `
 <!DOCTYPE html>
@@ -294,60 +388,34 @@
     <style>
         body { margin:0; overflow:hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
         #gv { width: 100vw; height: 100vh; position: relative; background: url('${config.assets.bg}') center/cover; }
-        #ui { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); padding: 10px 25px; border-radius: 30px; border: 2px solid gold; font-size: 22px; z-index: 100; font-weight: bold; }
-        #spk { position: absolute; top: 20px; right: 20px; font-size: 30px; cursor: pointer; z-index: 100; filter: drop-shadow(0 0 5px white); }
         
-        #game-logo {
-            position: absolute;
-            width: ${config.logo.w}px;
-            left: ${config.logo.x}%;
-            top: ${config.logo.y}%;
-            transform: translate(-50%, -50%);
-            border-radius: ${config.logo.shape};
-            z-index: 95;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            pointer-events: none;
-            object-fit: cover;
-        }
-
+        .ui-panel { position: absolute; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 30px; border: 2px solid gold; font-size: 22px; font-weight: bold; transform: translate(-50%, -50%); z-index: 100; white-space: nowrap; }
+        #ui-score { left: ${config.ui.x}%; top: ${config.ui.y}%; }
+        #ui-timer { left: ${config.ui.tx}%; top: ${config.ui.ty}%; }
+        
+        #spk-wrap { position: absolute; left: ${config.ui.sx}%; top: ${config.ui.sy}%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 30px; border: 2px solid gold; z-index: 100; }
+        #spk { font-size: 28px; cursor: pointer; filter: drop-shadow(0 0 5px white); }
+        #vol { width: 70px; cursor: pointer; accent-color: gold; }
+        
+        #game-logo { position: absolute; width: ${config.logo.w}px; left: ${config.logo.x}%; top: ${config.logo.y}%; transform: translate(-50%, -50%); border-radius: ${config.logo.shape}; z-index: 95; box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none; object-fit: cover; }
+        
         #hr { position: absolute; width: ${config.hero.s}%; left: ${config.hero.x}%; top: ${config.hero.y}%; transform: translate(-50%,-50%); z-index: 10; cursor:pointer; }
-        #hr img { width: 100%; animation: float 3s infinite ease-in-out; }
+        #hr img { width: 100%; animation: float 3s infinite ease-in-out; pointer-events: none; }
         @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
         
-        #hc { 
-            position: absolute;
-            bottom: 110%; left: 50%; transform: translateX(-50%); 
-            background: white; 
-            color: ${config.cloud.col}; 
-            font-size: ${config.cloud.sz}px; 
-            font-weight: bold;
-            padding: 15px 25px; 
-            border-radius: 40px;
-            display: none; 
-            white-space: nowrap; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-            z-index: 20; 
-            border: 2px solid #ccc;
-        }
+        #hc { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); background: white; color: ${config.cloud.col}; font-size: ${config.cloud.sz}px; font-weight: bold; padding: 15px 25px; border-radius: 40px; display: none; white-space: nowrap; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 20; border: 2px solid #ccc; pointer-events:none;}
         #hc::before { content:''; position:absolute; bottom:-10px; left:30%; width:15px; height:15px; background:white; border-radius:50%; box-shadow: -2px 2px 2px rgba(0,0,0,0.1); }
         #hc::after { content:''; position:absolute; bottom:-20px; left:20%; width:10px; height:10px; background:white; border-radius:50%; box-shadow: -2px 2px 2px rgba(0,0,0,0.1); }
 
-        #cz { position: absolute; width: ${config.pot.w}%; height: ${config.pot.h}%; left: ${config.pot.x}%; top: ${config.pot.y}%; transform: translate(-50%,-50%); background: url('${config.assets.pot}') center/contain no-repeat; display: flex; align-items: center; justify-content: center; z-index: 5; }
+        #cz { position: absolute; width: ${config.pot.w}%; height: ${config.pot.h}%; left: ${config.pot.x}%; top: ${config.pot.y}%; transform: translate(-50%,-50%); background: url('${config.assets.pot}') center/contain no-repeat; z-index: 5; }
         
-        .slots { 
-            display: flex; 
-            gap: ${config.pot.sg}px; 
-            flex-wrap: wrap; 
-            justify-content: center; 
-            width: ${config.pot.sw}%; 
-            margin-top: ${config.pot.st}px; 
-        }
-        
-        .slot { width: ${config.jar.w}px; height: ${config.jar.h}px; border: 2px dashed rgba(255,255,255,0.3); border-radius: 10px; flex-shrink: 0; }
+        #sc { position: absolute; left: ${config.pot.sx}%; top: ${config.pot.sy}%; transform: translate(-50%, -50%); display: flex; gap: ${config.pot.sg}px; flex-wrap: wrap; justify-content: center; z-index: 6; }
+        .slot { width: ${config.pot.sw}px; height: ${config.pot.sh}px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 10px; flex-shrink: 0; }
         
         #bank { position: absolute; inset: 0; pointer-events: none; }
-        .card { width: ${config.jar.w}px; height: ${config.jar.h}px; background: url('${config.assets.jar}') center/contain no-repeat; display: flex; align-items: center; justify-content: center; color: ${config.jar.col}; font-size: ${config.jar.sz}px; font-weight: bold; cursor: pointer; text-shadow: 1px 1px 2px #000; padding-top: ${config.jar.off}px; pointer-events: auto; position: absolute; transition: transform 0.2s; z-index: 20; }
+        .card { width: ${config.jar.w}px; height: ${config.jar.h}px; background: url('${config.assets.jar}') center/contain no-repeat; position: absolute; transition: transform 0.2s; z-index: 20; pointer-events: auto; }
         .card:hover { transform: scale(1.05); }
+        .jar-text { position: absolute; left: ${config.jar.tx}%; top: ${config.jar.ty}%; transform: translate(-50%, -50%); color: ${config.jar.col}; font-size: ${config.jar.sz}px; font-weight: bold; text-shadow: 1px 1px 2px #000; pointer-events: auto; cursor: default; }
 
         .btn-wrap { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 20px; z-index: 100; }
         .game-btn { padding: 15px 40px; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: transform 0.2s; }
@@ -357,7 +425,6 @@
 
         .fx-p { position: absolute; border-radius: 50%; animation: fwork 2.5s forwards; z-index: 100; pointer-events: none; }
         @keyframes fwork { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--rx)), var(--ry)) scale(var(--rs)); opacity: 0; } }
-
         .f-red { position: fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
         @keyframes f-out { 0% {opacity:1} 100% {opacity:0} }
 
@@ -375,65 +442,55 @@
 <body>
     <div id="gv">
         ${config.assets.logo ? `<img id="game-logo" src="${config.assets.logo}">` : ''}
-        <div id="ui">🏆 <span id="sv">0</span> | <span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
-        <div id="spk" onclick="speak()">🔊</div>
-        <div id="hr" onclick="toggleHint()"><div id="hc"></div><img src="${config.assets.hero}"></div>
-        <div id="cz"><div class="slots" id="sc"></div></div>
+        
+        <div id="ui-score" class="ui-panel draggable">🏆 <span id="sv">0</span></div>
+        <div id="ui-timer" class="ui-panel draggable"><span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
+        <div id="spk-wrap" class="draggable">
+            <span id="spk" onclick="speak()">🔊</span>
+            <input type="range" id="vol" min="0" max="1" step="0.1" value="1" oninput="updateVol(this.value)">
+        </div>
+
+        <div id="hr" class="draggable" onclick="toggleHint()"><div id="hc"></div><img src="${config.assets.hero}"></div>
+        <div id="cz" class="draggable"></div>
+        <div id="sc" class="draggable"></div>
         <div id="bank"></div>
+        
         <div class="btn-wrap">
-            <button id="btn-check" class="game-btn" onclick="check()">CHECK</button>
-            <button id="btn-reset" class="game-btn" onclick="initLevel()">RESET</button>
+            <button id="btn-check" class="game-btn" onclick="check()">${gDict.g_check}</button>
+            <button id="btn-reset" class="game-btn" onclick="initLevel()">${gDict.g_reset}</button>
         </div>
         
         <div id="fin">
-            <h1 style="font-family:Cinzel,serif; font-size:4em; margin-bottom: 0;">Level Complete!</h1>
+            <h1 style="font-family:Cinzel,serif; font-size:4em; margin-bottom: 0;">${gDict.g_complete}</h1>
             <div id="final-msg"></div>
-            <p style="font-size:24px;">Score: <span id="fs">0</span> | Time: <span id="ft">0</span></p>
+            <p style="font-size:24px;">${gDict.g_score} <span id="fs">0</span> | ${gDict.g_time} <span id="ft">0</span></p>
             <div class="gallery" id="pg"></div>
-            <button onclick="location.reload()" class="game-btn" style="background: gold; color: black; margin-top:30px; position:static;">PLAY AGAIN</button>
+            <button onclick="location.reload()" class="game-btn" style="background: gold; color: black; margin-top:30px; position:static;">${gDict.g_again}</button>
         </div>
     </div>
+
     <script>
         const cfg = ${JSON.stringify(config)};
         let step = 0, score = 0, collected = [], timeVal = 0, tInt, audBG;
+        window.gameVol = 1.0;
         let sentences = cfg.m.split('\\n').filter(s => s.trim());
-        const topEdge = cfg.pot.y - (cfg.pot.h / 2);
 
-        let gameVoices = [];
-        const loadVoices = () => { gameVoices = window.speechSynthesis.getVoices(); };
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-        setTimeout(loadVoices, 1000);
-
-        function getVoiceConfig(preset) {
-            switch(preset) {
-                case 'child_uk': return { pitch: 1.6, rate: 1.1, type: 'female' };
-                case 'teen_f_uk': return { pitch: 1.2, rate: 1.1, type: 'female' };
-                case 'teen_m_uk': return { pitch: 1.1, rate: 1.15, type: 'male' };
-                case 'lady_uk': return { pitch: 1.0, rate: 0.95, type: 'female' };
-                case 'gent_uk': return { pitch: 0.7, rate: 0.9, type: 'male' };
-                default: return { pitch: 1.0, rate: 1.0, type: 'female' };
-            }
-        }
-
-        function findBritishVoice(type) {
-            if(!gameVoices.length) return null;
-            const britVoices = gameVoices.filter(v => v.lang === 'en-GB' || v.name.includes('UK English') || v.name.includes('British'));
-            if (britVoices.length === 0) return null;
-            if (type === 'male') {
-                return britVoices.find(v => v.name.includes('Male') || v.name.includes('George') || v.name.includes('Daniel')) || britVoices[0];
-            } else {
-                return britVoices.find(v => v.name.includes('Female') || v.name.includes('Hazel') || v.name.includes('Martha') || v.name.includes('Susan')) || britVoices[0];
-            }
-        }
+        function updateVol(v) { window.gameVol = v; if(audBG) audBG.volume = v; }
+        function playSnd(url) { if(!url) return; let a = new Audio(url); a.volume = window.gameVol; a.play().catch(()=>{}); }
 
         function speak() { 
             let u = new SpeechSynthesisUtterance(sentences[step]);
-            let vParams = getVoiceConfig(cfg.voice);
-            let selected = findBritishVoice(vParams.type);
-            if(selected) u.voice = selected;
+            let p = 1.0, r = 1.0, isM = false;
+            if(cfg.voice === 'child_uk') { p = 1.6; r = 1.1; }
+            if(cfg.voice === 'teen_f_uk') { p = 1.2; r = 1.1; }
+            if(cfg.voice === 'teen_m_uk') { p = 1.1; r = 1.15; isM = true; }
+            if(cfg.voice === 'lady_uk') { p = 1.0; r = 0.95; }
+            if(cfg.voice === 'gent_uk') { p = 0.7; r = 0.9; isM = true; }
+
+            const v = window.speechSynthesis.getVoices().filter(x => x.lang === 'en-GB' || x.name.includes('UK English'));
+            if(v.length > 0) u.voice = v.find(x => x.name.toLowerCase().includes(isM ? 'male' : 'female')) || v[0];
             else u.lang = 'en-GB'; 
-            u.pitch = vParams.pitch;
-            u.rate = vParams.rate;
+            u.pitch = p; u.rate = r; u.volume = window.gameVol;
             speechSynthesis.speak(u); 
         }
 
@@ -450,15 +507,16 @@
             words.forEach((w, i) => { const s = document.createElement('div'); s.className = 'slot'; s.id = 's'+i; document.getElementById('sc').appendChild(s); });
             let jarWords = [...words].sort(() => Math.random() - 0.5);
             jarWords.forEach((w, i) => {
-                const c = document.createElement('div'); c.className = 'card'; c.innerText = w;
-                let row = Math.floor(i / 2); 
-                let col = i % 2;
+                const c = document.createElement('div'); c.className = 'card';
+                const tSpan = document.createElement('span'); tSpan.className = 'jar-text draggable'; tSpan.id = 'jar-text-' + i; tSpan.innerText = w; c.appendChild(tSpan);
+                let row = Math.floor(i / 2), col = i % 2;
                 c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; 
                 c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
                 
-                c.onclick = () => {
+                c.onclick = (e) => {
+                    if(e.target.closest('.draggable') && window !== window.top) return; // Prevent click in editor drag mode
                     if(!tInt) startTimer();
-                    if(cfg.assets.abg && (!audBG || audBG.paused)) { audBG = new Audio(cfg.assets.abg); audBG.loop = true; audBG.play(); }
+                    if(cfg.assets.abg && (!audBG || audBG.paused)) { audBG = new Audio(cfg.assets.abg); audBG.loop = true; audBG.volume = window.gameVol; audBG.play().catch(()=>{}); }
                     if(c.parentElement.id === 'bank') {
                         const next = Array.from(document.querySelectorAll('.slot')).find(sl => !sl.firstChild);
                         if(next) { next.appendChild(c); c.style.position='static'; score++; }
@@ -472,19 +530,13 @@
         function updateTimeDisplay() {
             let m = Math.floor(timeVal/60), s = timeVal%60;
             document.getElementById('tv').innerText = (m<10?'0':'')+m+':'+(s<10?'0':'')+s;
-            if(cfg.timer.mode === 'down' && timeVal <= 10) document.getElementById('tv').style.color = 'red';
-            else document.getElementById('tv').style.color = 'white';
+            document.getElementById('tv').style.color = (cfg.timer.mode === 'down' && timeVal <= 10) ? 'red' : 'white';
         }
 
         function startTimer() { 
             if(tInt) clearInterval(tInt);
             tInt = setInterval(() => { 
-                if(cfg.timer.mode === 'down') {
-                    timeVal--;
-                    if(timeVal <= 0) { clearInterval(tInt); check(true); } 
-                } else {
-                    timeVal++;
-                }
+                if(cfg.timer.mode === 'down') { timeVal--; if(timeVal <= 0) { clearInterval(tInt); check(true); } } else { timeVal++; }
                 updateTimeDisplay();
             }, 1000);
         }
@@ -494,11 +546,8 @@
             for(let i=0; i<count; i++) {
                 setTimeout(() => {
                     const p = document.createElement('div'); p.className = 'fx-p';
-                    p.style.setProperty('--rx', (Math.random() * 500 - 250) + 'px');
-                    p.style.setProperty('--ry', (Math.random() * -400 - 100) + 'px');
-                    p.style.setProperty('--rs', (Math.random() * 1.5 + 0.5));
-                    p.style.width = p.style.height = (Math.random()*15+10)+'px';
-                    p.style.left = cfg.pot.x + '%'; p.style.top = topEdge + '%';
+                    p.style.setProperty('--rx', (Math.random() * 500 - 250) + 'px'); p.style.setProperty('--ry', (Math.random() * -400 - 100) + 'px'); p.style.setProperty('--rs', (Math.random() * 1.5 + 0.5));
+                    p.style.width = p.style.height = (Math.random()*15+10)+'px'; p.style.left = cfg.pot.x + '%'; p.style.top = (cfg.pot.y - (cfg.pot.h/2)) + '%';
                     if(mode === 'win') { p.style.background = ['#9b59b2','#2ecc71','#f1c40f','#e84393','#55efc4'][Math.floor(Math.random()*5)]; p.style.border="1px solid white"; }
                     else { p.style.background = ['#ff4d4d','#ff944d','#ff1a1a'][Math.floor(Math.random()*3)]; p.style.boxShadow="0 0 10px orange"; }
                     document.getElementById('gv').appendChild(p); setTimeout(()=>p.remove(), 2500);
@@ -508,85 +557,105 @@
 
         function check(isTimeout = false) {
             let target = sentences[step].split(/\\s+/), ok = true;
-            target.forEach((w, i) => { const s = document.getElementById('s'+i); if(!s.firstChild || s.firstChild.innerText !== w) ok = false; });
-            if (isTimeout && !ok) {
-                 if(cfg.assets.afail) new Audio(cfg.assets.afail).play();
-                 spawnFX('fail');
-                 alert('Время вышло! Попробуйте еще раз.');
-                 initLevel();
-                 return;
-            }
+            target.forEach((w, i) => { const s = document.getElementById('s'+i); if(!s.firstChild || s.firstChild.querySelector('.jar-text').innerText !== w) ok = false; });
+            if (isTimeout && !ok) { playSnd(cfg.assets.afail); spawnFX('fail'); alert('${gDict.g_timeout}'); initLevel(); return; }
 
             if(ok) {
-                if(cfg.assets.awin) new Audio(cfg.assets.awin).play();
-                spawnFX('win');
-                let pContent;
-                if(cfg.assets.customPrize && Math.random() > 0.5) {
-                    pContent = '<img src="'+cfg.assets.customPrize+'">';
-                } else {
-                    pContent = cfg.emojis[Math.floor(Math.random()*cfg.emojis.length)];
-                }
-                collected.push(pContent); 
-                showPrize(pContent);
+                playSnd(cfg.assets.awin); spawnFX('win');
+                let pContent = (cfg.assets.customPrize && Math.random() > 0.5) ? '<img src="'+cfg.assets.customPrize+'">' : cfg.emojis[Math.floor(Math.random()*cfg.emojis.length)];
+                collected.push(pContent); showPrize(pContent);
                 setTimeout(() => { step++; initLevel(); }, 3000);
             } else {
-                if(cfg.assets.afail) new Audio(cfg.assets.afail).play();
-                score -= 5; document.getElementById('sv').innerText = score;
+                playSnd(cfg.assets.afail); score -= 5; document.getElementById('sv').innerText = score;
                 spawnFX('fail'); const f = document.createElement('div'); f.className='f-red'; document.body.appendChild(f); setTimeout(()=>f.remove(), 500);
                 showPrize(cfg.failEmojis[Math.floor(Math.random()*cfg.failEmojis.length)]);
             }
         }
 
         function showPrize(content) {
-            const e = document.createElement('div');
-            e.className='fly-e'; 
-            e.innerHTML = content;
-            e.style.left = cfg.pot.x + '%'; e.style.top = topEdge + '%';
-            e.style.setProperty('--rx', (Math.random() * 100 - 50) + 'px');
+            const e = document.createElement('div'); e.className='fly-e'; e.innerHTML = content;
+            e.style.left = cfg.pot.x + '%'; e.style.top = (cfg.pot.y - (cfg.pot.h/2)) + '%'; e.style.setProperty('--rx', (Math.random() * 100 - 50) + 'px');
             document.body.appendChild(e); setTimeout(()=>e.remove(), 2000);
         }
 
         function toggleHint() { const h = document.getElementById('hc'); h.style.display = h.style.display==='block'?'none':'block'; }
         
         function finish() { 
-            clearInterval(tInt); 
-            document.getElementById('fin').style.display='flex'; 
-            document.getElementById('fs').innerText=score; 
-            document.getElementById('ft').innerText=document.getElementById('tv').innerText; 
+            clearInterval(tInt); document.getElementById('fin').style.display='flex'; 
+            document.getElementById('fs').innerText=score; document.getElementById('ft').innerText=document.getElementById('tv').innerText; 
             document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); 
-            
-            // Random Slogan Logic
-            const slogans = cfg.slogans.filter(s => s.trim() !== "");
-            if(slogans.length > 0) {
-                document.getElementById('final-msg').innerText = slogans[Math.floor(Math.random() * slogans.length)].trim();
-            }
+            if(cfg.slogans.length > 0) document.getElementById('final-msg').innerText = cfg.slogans[Math.floor(Math.random() * cfg.slogans.length)].trim();
         }
+
+        // --- ВСТРОЕННЫЙ ДВИЖОК DRAG & DROP ДЛЯ РЕДАКТОРА ---
+        if (window !== window.top) {
+            const s = document.createElement('style');
+            s.innerHTML = '.draggable { outline: 2px dashed rgba(255,215,0,0.6); cursor: move !important; } .draggable:hover { outline-color: #0f0; z-index: 1000; }';
+            document.head.appendChild(s);
+
+            let dragged = null, shiftX, shiftY;
+            document.addEventListener('mousedown', (e) => {
+                let t = e.target.closest('.draggable');
+                if (!t || e.target.tagName === 'INPUT') return;
+                dragged = t; let rect = dragged.getBoundingClientRect();
+                shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
+                document.addEventListener('mousemove', onDrag); document.addEventListener('mouseup', stopDrag);
+                e.preventDefault();
+            });
+
+            function onDrag(e) {
+                if (!dragged) return;
+                if (dragged.id === 'bank-handle') {
+                    let px = e.clientX - shiftX; let py = e.clientY - shiftY;
+                    dragged.style.left = px + 'px'; dragged.style.top = py + 'px';
+                } else {
+                    let rect = dragged.getBoundingClientRect();
+                    let cx = e.clientX - shiftX + rect.width / 2; let cy = e.clientY - shiftY + rect.height / 2;
+                    let px = (cx / window.innerWidth) * 100; let py = (cy / window.innerHeight) * 100;
+                    dragged.style.left = px + '%'; dragged.style.top = py + '%';
+                }
+            }
+
+            function stopDrag(e) {
+                if (!dragged) return;
+                window.parent.postMessage({ type: 'posUpdate', id: dragged.id, x: parseFloat(dragged.style.left).toFixed(2), y: parseFloat(dragged.style.top).toFixed(2) }, '*');
+                document.removeEventListener('mousemove', onDrag); document.removeEventListener('mouseup', stopDrag);
+                dragged = null;
+            }
+
+            window.addEventListener('DOMContentLoaded', () => {
+                let bh = document.createElement('div');
+                bh.id = 'bank-handle'; bh.className = 'draggable';
+                bh.style.cssText = 'position:absolute; left:'+cfg.bank.x+'px; top:'+cfg.bank.y+'px; width:100px; height:100px; background:rgba(255,215,0,0.3); border:2px dashed gold; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; font-size:12px; text-align:center; text-shadow:1px 1px 2px #000; z-index:50;';
+                bh.innerHTML = 'START BANK<br>(Drag me)';
+                document.getElementById('gv').appendChild(bh);
+            });
+        }
+
         initLevel();
     <\/script>
 </body>
 </html>`;
 
         currentSource = finalHtml;
-        // ГЕНЕРАЦИЯ ДЛЯ GENIALLY (SINGLE QUOTES)
         document.getElementById('code-output').value = `<iframe width="100%" height="100%" frameborder="0" srcdoc='${finalHtml.replace(/'/g, "&#39;")}'></iframe>`;
-        const blob = new Blob([finalHtml], { type: 'text/html' });
-        document.getElementById('live-frame').src = URL.createObjectURL(blob);
+        
+        // Обновляем окно предпросмотра ТОЛЬКО если это не авто-сохранение от Drag&Drop
+        if (!skipIframe) {
+            const blob = new Blob([finalHtml], { type: 'text/html' });
+            document.getElementById('live-frame').src = URL.createObjectURL(blob);
+        }
     }
 
     function copyCode() { document.getElementById('code-output').select(); document.execCommand('copy'); alert('Код скопирован!'); }
-    
     function downloadGame() {
         if(!currentSource) { alert('Сначала создайте игру!'); return; }
         const blob = new Blob([currentSource], { type: 'text/html' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'magic-pot-v6.6.html';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'magic-pot-v8-builder.html';
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
-    window.onload = updateCode;
+    window.onload = () => { loadBank(); updateCode(); };
 </script>
 </body>
 </html>
