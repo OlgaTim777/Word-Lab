@@ -2,7 +2,7 @@
 <html lang='ru'>
 <head>
     <meta charset='UTF-8'>
-    <title>Magic Pot v8.2 - Ultimate Masterpiece</title>
+    <title>Magic Pot v9.1 - Ultimate Foreground & Free Drag</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; --tab-bg: #3e266b; --tab-active: #5a3e85; }
@@ -13,7 +13,7 @@
         h2 { margin: 15px 0; font-family: 'Cinzel', serif; color: var(--gold); text-align: center; letter-spacing: 2px; }
         
         .tabs { display: flex; background: var(--tab-bg); border-bottom: 2px solid var(--gold); }
-        .tab-btn { flex: 1; padding: 10px 5px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
+        .tab-btn { flex: 1; padding: 10px 5px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
         .tab-btn:hover { background: rgba(255,255,255,0.1); }
         .tab-btn.active { background: var(--tab-active); color: var(--gold); border-bottom: 3px solid var(--gold); }
         .tab-content { display: none; padding: 15px; overflow-y: auto; flex-grow: 1; }
@@ -38,7 +38,7 @@
         .btn-save { background: #4cd964; }
         .btn-json { background: #00bcd4; color: #fff; }
         
-        .btn-small { padding: 6px; background: #5a3e85; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; margin-top: 5px; text-transform: uppercase; font-weight: bold; }
+        .btn-small { padding: 6px; background: #5a3e85; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 10px; margin-top: 5px; text-transform: uppercase; font-weight: bold; width: 100%; }
         .btn-small:hover { background: #764abc; }
         .btn-danger { background: #e74c3c; } .btn-danger:hover { background: #c0392b; }
         
@@ -58,7 +58,7 @@
 
 <div id='editor-panel'>
     <div class="top-bar">
-        <h2>Magic Pot v8.2</h2>
+        <h2>Magic Pot v9.1</h2>
         <select id="editor-lang" class="lang-select" onchange="changeLanguage()">
             <option value="ru">🇷🇺 RU</option>
             <option value="en">🇬🇧 EN</option>
@@ -70,10 +70,12 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab('tab-main')" data-i18n="tab_main">База</button>
         <button class="tab-btn" onclick="openTab('tab-visuals')" data-i18n="tab_visuals">Визуал</button>
-        <button class="tab-btn" onclick="openTab('tab-mech')" data-i18n="tab_mech">Координаты</button>
+        <button class="tab-btn" onclick="openTab('tab-location')" data-i18n="tab_location">Место</button>
+        <button class="tab-btn" onclick="openTab('tab-size')" data-i18n="tab_size">Размер</button>
         <button class="tab-btn" onclick="openTab('tab-bank')" data-i18n="tab_bank">Память</button>
     </div>
 
+    <!-- ТАБ 1: ОСНОВА -->
     <div id="tab-main" class="tab-content active">
         <div class="btn-group">
             <button class='btn-magic btn-copy' onclick='copyCode()' data-i18n="btn_copy">📋 КОПИРОВАТЬ</button>
@@ -98,7 +100,7 @@
                 <option value="lady_uk">🇬🇧 Леди</option>
                 <option value="gent_uk">🇬🇧 Джентльмен</option>
             </select>
-            <button class="btn-small" onclick="testVoice()" data-i18n="btn_test_voice" style="width:100%">🔊 Проверить голос</button>
+            <button class="btn-small" onclick="testVoice()" data-i18n="btn_test_voice">🔊 Проверить голос</button>
         </div>
 
         <div class='magic-box'>
@@ -113,43 +115,6 @@
                 <div><input type='number' id='t-lim' value='60' oninput='updateCode()'></div>
             </div>
         </div>
-    </div>
-
-    <div id="tab-visuals" class="tab-content">
-        <div class='magic-box'>
-            <label data-i18n="lbl_branding">🏷️ БРЕНДИНГ (ЛОГО)</label>
-            <input type='file' accept="image/*" onchange='handleFile(this, "logo")'>
-            <div class='grid-2' style="margin-top:5px;">
-                <div><div class="sub-label">Ширина (px):</div><input type='number' id='l-w' value='100' oninput='updateCode()'></div>
-                <div><div class="sub-label">Форма:</div>
-                    <select id='l-shape' onchange='updateCode()'>
-                        <option value='0px'>Квадрат</option><option value='50%'>Круг</option><option value='20px'>Скругленный</option>
-                    </select>
-                </div>
-                <div><div class="sub-label">Поз X (%):</div><input type='number' id='l-x' value='92' oninput='updateCode()'></div>
-                <div><div class="sub-label">Поз Y (%):</div><input type='number' id='l-y' value='90' oninput='updateCode()'></div>
-            </div>
-        </div>
-
-        <div class='magic-box'>
-            <label data-i18n="lbl_design">🎨 ОФОРМЛЕНИЕ ИГРЫ</label>
-            <div class="sub-label">Фон игры:</div><input type='file' accept="image/*" onchange='handleFile(this, "bg")'>
-            <div class="sub-label">Картинка котла:</div><input type='file' accept="image/*" onchange='handleFile(this, "pot")'>
-            <div class="sub-label">Вид карточки:</div><input type='file' accept="image/*" onchange='handleFile(this, "jar")'>
-            <div class='grid-2' style="margin-top:5px;">
-                <div><div class="sub-label">Цвет текста банок</div><input type='color' id='j-col' value='#ffffff' oninput='updateCode()'></div>
-                <div><div class="sub-label">Шрифт банок</div><input type='number' id='j-sz' value='16' oninput='updateCode()'></div>
-            </div>
-        </div>
-
-        <div class='magic-box'>
-            <label data-i18n="lbl_hero">👾 ПЕРСОНАЖ И ОБЛАКО</label>
-            <input type='file' accept="image/*" onchange='handleFile(this, "hero")'>
-            <div class='grid-2' style="margin-top:5px;">
-                <div><div class="sub-label">Цвет облака</div><input type='color' id='c-col' value='#000000' oninput='updateCode()'></div>
-                <div><div class="sub-label">Шрифт облака</div><input type='number' id='c-sz' value='18' oninput='updateCode()'></div>
-            </div>
-        </div>
 
         <div class='magic-box'>
             <label data-i18n="lbl_audio">🎵 МУЗЫКА И ЭФФЕКТЫ</label>
@@ -159,67 +124,100 @@
         </div>
     </div>
 
-    <div id="tab-mech" class="tab-content">
+    <!-- ТАБ 2: ВИЗУАЛ -->
+    <div id="tab-visuals" class="tab-content">
+        <div class='magic-box'>
+            <label>🎨 ИЗОБРАЖЕНИЯ ФАЙЛЫ</label>
+            <div class="grid-2">
+                <div><div class="sub-label">Логотип:</div><input type='file' accept="image/*" onchange='handleFile(this, "logo")'></div>
+                <div><div class="sub-label">Фон игры:</div><input type='file' accept="image/*" onchange='handleFile(this, "bg")'></div>
+                <div><div class="sub-label">Котел:</div><input type='file' accept="image/*" onchange='handleFile(this, "pot")'></div>
+                <div><div class="sub-label">Герой:</div><input type='file' accept="image/*" onchange='handleFile(this, "hero")'></div>
+                <div><div class="sub-label">Вид баночки:</div><input type='file' accept="image/*" onchange='handleFile(this, "jar")'></div>
+                <div><div class="sub-label">Картинка приза:</div><input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'></div>
+            </div>
+        </div>
+
+        <div class='magic-box'>
+            <label>🌈 ЦВЕТА И ЭМОДЖИ</label>
+            <div class='grid-2'>
+                <div><div class="sub-label">Цвет текста банок</div><input type='color' id='j-col' value='#ffffff' oninput='updateCode()'></div>
+                <div><div class="sub-label">Цвет облака</div><input type='color' id='c-col' value='#000000' oninput='updateCode()'></div>
+            </div>
+            <div class='grid-2' style="margin-top:5px;">
+                <div><div class="sub-label">Эмоджи Призы:</div><input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'></div>
+                <div><div class="sub-label">Эмоджи Ошибки:</div><input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТАБ 3: МЕСТОПОЛОЖЕНИЕ -->
+    <div id="tab-location" class="tab-content">
         <div class="section-div" style="margin-top:0;">📍 Можно менять мышью прямо на экране игры!</div>
         <div class='magic-box'>
-            <label>🎮 ОСНОВНЫЕ ЭЛЕМЕНТЫ</label>
+            <label>🎮 ПОЗИЦИИ ЭЛЕМЕНТОВ (%)</label>
             <div class='grid-4'>
-                <div><div class="sub-label">Счетчик X %</div><input type='number' id='ui-x' value='5' oninput='updateCode()'></div>
-                <div><div class="sub-label">Счетчик Y %</div><input type='number' id='ui-y' value='5' oninput='updateCode()'></div>
-                <div><div class="sub-label">Таймер X %</div><input type='number' id='tm-x' value='18' oninput='updateCode()'></div>
-                <div><div class="sub-label">Таймер Y %</div><input type='number' id='tm-y' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Герой X</div><input type='number' id='h-x' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Герой Y</div><input type='number' id='h-y' value='45' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел X</div><input type='number' id='p-x' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Y</div><input type='number' id='p-y' value='65' oninput='updateCode()'></div>
                 
-                <div><div class="sub-label">Звук X %</div><input type='number' id='spk-x' value='80' oninput='updateCode()'></div>
-                <div><div class="sub-label">Звук Y %</div><input type='number' id='spk-y' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Логотип X</div><input type='number' id='l-x' value='92' oninput='updateCode()'></div>
+                <div><div class="sub-label">Логотип Y</div><input type='number' id='l-y' value='90' oninput='updateCode()'></div>
+                <div><div class="sub-label">Счетчик X</div><input type='number' id='ui-x' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Счетчик Y</div><input type='number' id='ui-y' value='5' oninput='updateCode()'></div>
                 
-                <div><div class="sub-label">Герой X %</div><input type='number' id='h-x' value='80' oninput='updateCode()'></div>
-                <div><div class="sub-label">Герой Y %</div><input type='number' id='h-y' value='45' oninput='updateCode()'></div>
+                <div><div class="sub-label">Таймер X</div><input type='number' id='tm-x' value='18' oninput='updateCode()'></div>
+                <div><div class="sub-label">Таймер Y</div><input type='number' id='tm-y' value='5' oninput='updateCode()'></div>
+                <div><div class="sub-label">Звук X</div><input type='number' id='spk-x' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Звук Y</div><input type='number' id='spk-y' value='5' oninput='updateCode()'></div>
                 
-                <div><div class="sub-label">Котел X %</div><input type='number' id='p-x' value='50' oninput='updateCode()'></div>
-                <div><div class="sub-label">Котел Y %</div><input type='number' id='p-y' value='65' oninput='updateCode()'></div>
-                
-                <div><div class="sub-label">Размер Героя px</div><input type='number' id='h-s' value='200' oninput='updateCode()'></div>
-                <div><div class="sub-label">Котел Шир. px</div><input type='number' id='p-w' value='400' oninput='updateCode()'></div>
-                <div><div class="sub-label">Котел Выс. px</div><input type='number' id='p-h' value='300' oninput='updateCode()'></div>
+                <div><div class="sub-label">Зона слотов X</div><input type='number' id='s-x' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Зона слотов Y</div><input type='number' id='s-y' value='60' oninput='updateCode()'></div>
+                <div><div class="sub-label">Текст Банок X</div><input type='number' id='j-tx' value='50' oninput='updateCode()'></div>
+                <div><div class="sub-label">Текст Банок Y</div><input type='number' id='j-ty' value='50' oninput='updateCode()'></div>
             </div>
-        </div>
-
-        <div class='magic-box'>
-            <label>🏺 ВНУТРЕННОСТИ КОТЛА</label>
-            <div class='grid-4'>
-                <div><div class="sub-label">Зона X (%)</div><input type='number' id='s-x' value='50' oninput='updateCode()'></div>
-                <div><div class="sub-label">Зона Y (%)</div><input type='number' id='s-y' value='60' oninput='updateCode()'></div>
-                <div><div class="sub-label">Шир.Слота px</div><input type='number' id='s-w' value='80' oninput='updateCode()'></div>
-                <div><div class="sub-label">Выс.Слота px</div><input type='number' id='s-h' value='100' oninput='updateCode()'></div>
-                <div><div class="sub-label">Отступ(Gap) px</div><input type='number' id='p-sg' value='10' oninput='updateCode()'></div>
-            </div>
-        </div>
-
-        <div class='magic-box'>
-            <label>🧪 БАНОЧКИ И ТЕКСТ В НИХ</label>
-            <div class='grid-4'>
-                <div><div class="sub-label">Ширина (px)</div><input type='number' id='j-w' value='80' oninput='updateCode()'></div>
-                <div><div class="sub-label">Высота (px)</div><input type='number' id='j-h' value='100' oninput='updateCode()'></div>
-                <div><div class="sub-label">Текст X (%)</div><input type='number' id='j-tx' value='50' oninput='updateCode()'></div>
-                <div><div class="sub-label">Текст Y (%)</div><input type='number' id='j-ty' value='50' oninput='updateCode()'></div>
-            </div>
-            <div class="section-div">РАСПРЕДЕЛЕНИЕ БАНОК (PX)</div>
+            <div class="section-div">БАЗОВАЯ СЕТКА БАНОК (PX)</div>
             <div class='grid-4'>
                 <div><div class="sub-label">Start X (px)</div><input type='number' id='b-x' value='40' oninput='updateCode()'></div>
                 <div><div class="sub-label">Start Y (px)</div><input type='number' id='b-y' value='150' oninput='updateCode()'></div>
                 <div><div class="sub-label">Шаг X</div><input type='number' id='b-gx' value='95' oninput='updateCode()'></div>
                 <div><div class="sub-label">Шаг Y</div><input type='number' id='b-gy' value='110' oninput='updateCode()'></div>
             </div>
-        </div>
-        
-        <div class='magic-box'>
-            <label data-i18n="lbl_rewards">🎁 ЭМОДЖИ</label>
-            <div class="sub-label">Призы:</div><input type='text' id='prize-emojis' value='🍬,⭐,🔮,🦄,🐸' oninput='updateCode()'>
-            <div class="sub-label">Или картинка:</div><input type='file' accept="image/*" onchange='handleFile(this, "customPrize")'>
-            <div class="sub-label">Ошибки:</div><input type='text' id='fail-emojis' value='💩,💀,⚡,💨' oninput='updateCode()'>
+            <div style="margin-top:10px;">
+                <button class="btn-small btn-danger" onclick="resetJarPositions()" data-i18n="btn_reset_jars">🔄 Сбросить позиции баночек</button>
+            </div>
         </div>
     </div>
 
+    <!-- ТАБ 4: РАЗМЕР -->
+    <div id="tab-size" class="tab-content">
+        <div class='magic-box'>
+            <label>📏 ГАБАРИТЫ И МАСШТАБ (PX)</label>
+            <div class='grid-4'>
+                <div><div class="sub-label">Ширина Лого</div><input type='number' id='l-w' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Ширина Героя</div><input type='number' id='h-s' value='200' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Шир.</div><input type='number' id='p-w' value='400' oninput='updateCode()'></div>
+                <div><div class="sub-label">Котел Выс.</div><input type='number' id='p-h' value='300' oninput='updateCode()'></div>
+                
+                <div><div class="sub-label">Ячейка Шир.</div><input type='number' id='s-w' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Ячейка Выс.</div><input type='number' id='s-h' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Отступ Ячеек</div><input type='number' id='p-sg' value='10' oninput='updateCode()'></div>
+                <div></div>
+                
+                <div><div class="sub-label">Банка Шир.</div><input type='number' id='j-w' value='80' oninput='updateCode()'></div>
+                <div><div class="sub-label">Банка Выс.</div><input type='number' id='j-h' value='100' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шрифт Банок</div><input type='number' id='j-sz' value='16' oninput='updateCode()'></div>
+                <div><div class="sub-label">Шрифт Облака</div><input type='number' id='c-sz' value='18' oninput='updateCode()'></div>
+            </div>
+            <div class="section-div">ФОРМА ЛОГОТИПА</div>
+            <select id='l-shape' onchange='updateCode()'>
+                <option value='0px'>Квадрат</option><option value='50%'>Круг</option><option value='20px'>Скругленный</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- ТАБ 5: БАЗА ИГР -->
     <div id="tab-bank" class="tab-content">
         <div class="btn-group">
             <button class="btn-magic btn-json" onclick="exportJSON()" data-i18n="btn_exp_json">⬇️ ЭКСПОРТ JSON</button>
@@ -244,13 +242,15 @@
 
 <script>
     const dict = {
-        ru: { tab_main: "База", tab_visuals: "Визуал", tab_mech: "Координаты", tab_bank: "Память", btn_copy: "📋 КОПИРОВАТЬ", btn_download: "💾 СКАЧАТЬ ФАЙЛ", btn_test_voice: "🔊 Проверить голос", lbl_texts: "📝 ТЕКСТЫ И СЛОГАНЫ", lbl_sentences: "Предложения:", lbl_final_msgs: "Финальные фразы:", lbl_voice: "🗣️ ОЗВУЧКА", lbl_branding: "🏷️ БРЕНДИНГ", lbl_design: "🎨 ОФОРМЛЕНИЕ", lbl_hero: "👾 ПЕРСОНАЖ", lbl_timer: "⏱️ ТАЙМЕР", opt_stopwatch: "Секундомер", opt_countdown: "Отсчет", lbl_rewards: "🎁 НАГРАДЫ И ОШИБКИ", lbl_audio: "🎵 МУЗЫКА И ЭФФЕКТЫ", btn_exp_json: "⬇️ ЭКСПОРТ JSON", btn_imp_json: "⬆️ ИМПОРТ JSON", lbl_save_bank: "💾 СОХРАНИТЬ", btn_save: "Сохранить", lbl_my_games: "📁 МОИ ИГРЫ", g_check: "ПРОВЕРИТЬ", g_reset: "СБРОС", g_complete: "Уровень пройден!", g_score: "Очки: ", g_time: "Время: ", g_again: "ИГРАТЬ СНОВА", g_timeout: "Время вышло!" },
-        en: { tab_main: "Base", tab_visuals: "Visuals", tab_mech: "Coords", tab_bank: "Memory", btn_copy: "📋 COPY CODE", btn_download: "💾 DOWNLOAD", btn_test_voice: "🔊 Test Voice", lbl_texts: "📝 TEXTS & SLOGANS", lbl_sentences: "Sentences:", lbl_final_msgs: "Final Messages:", lbl_voice: "🗣️ VOICEOVER", lbl_branding: "🏷️ BRANDING", lbl_design: "🎨 DESIGN", lbl_hero: "👾 HERO", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stopwatch", opt_countdown: "Countdown", lbl_rewards: "🎁 REWARDS", lbl_audio: "🎵 AUDIO & FX", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAVE", btn_save: "Save", lbl_my_games: "📁 MY GAMES", g_check: "CHECK", g_reset: "RESET", g_complete: "Level Complete!", g_score: "Score: ", g_time: "Time: ", g_again: "PLAY AGAIN", g_timeout: "Time is up!" }
+        ru: { tab_main: "База", tab_visuals: "Визуал", tab_location: "Место", tab_size: "Размер", tab_bank: "Память", btn_copy: "📋 КОПИРОВАТЬ", btn_download: "💾 СКАЧАТЬ ФАЙЛ", btn_test_voice: "🔊 Проверить голос", lbl_texts: "📝 ТЕКСТЫ И СЛОГАНЫ", lbl_sentences: "Предложения:", lbl_final_msgs: "Финальные фразы:", lbl_voice: "🗣️ ОЗВУЧКА", lbl_timer: "⏱️ ТАЙМЕР", opt_stopwatch: "Секундомер", opt_countdown: "Отсчет", btn_exp_json: "⬇️ ЭКСПОРТ JSON", btn_imp_json: "⬆️ ИМПОРТ JSON", lbl_save_bank: "💾 СОХРАНИТЬ", btn_save: "Сохранить", lbl_my_games: "📁 МОИ ИГРЫ", g_check: "ПРОВЕРИТЬ", g_reset: "СБРОС", g_complete: "Уровень пройден!", g_score: "Очки: ", g_time: "Время: ", g_again: "ИГРАТЬ СНОВА", g_timeout: "Время вышло!", btn_reset_jars: "🔄 Сбросить позиции баночек" },
+        en: { tab_main: "Base", tab_visuals: "Visuals", tab_location: "Location", tab_size: "Size", tab_bank: "Memory", btn_copy: "📋 COPY CODE", btn_download: "💾 DOWNLOAD", btn_test_voice: "🔊 Test Voice", lbl_texts: "📝 TEXTS & SLOGANS", lbl_sentences: "Sentences:", lbl_final_msgs: "Final Messages:", lbl_voice: "🗣️ VOICEOVER", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stopwatch", opt_countdown: "Countdown", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAVE", btn_save: "Save", lbl_my_games: "📁 MY GAMES", g_check: "CHECK", g_reset: "RESET", g_complete: "Level Complete!", g_score: "Score: ", g_time: "Time: ", g_again: "PLAY AGAIN", g_timeout: "Time is up!", btn_reset_jars: "🔄 Reset Jar Positions" },
+        de: { tab_main: "Basis", tab_visuals: "Optik", tab_location: "Position", tab_size: "Größe", tab_bank: "Speicher", btn_copy: "📋 KOPIEREN", btn_download: "💾 HERUNTERL.", btn_test_voice: "🔊 Testen", lbl_texts: "📝 TEXTE", lbl_sentences: "Sätze:", lbl_final_msgs: "Abschluss:", lbl_voice: "🗣️ STIMME", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stoppuhr", opt_countdown: "Countdown", btn_exp_json: "⬇️ JSON EXPORT", btn_imp_json: "⬆️ JSON IMPORT", lbl_save_bank: "💾 SPEICHERN", btn_save: "Speichern", lbl_my_games: "📁 MEINE SPIELE", g_check: "PRÜFEN", g_reset: "RESET", g_complete: "Geschafft!", g_score: "Punkte: ", g_time: "Zeit: ", g_again: "NOCHMAL", g_timeout: "Zeit abgelaufen!", btn_reset_jars: "🔄 Dosenpositionen zurücksetzen" },
+        fr: { tab_main: "Base", tab_visuals: "Visuels", tab_location: "Position", tab_size: "Taille", tab_bank: "Mémoire", btn_copy: "📋 COPIER", btn_download: "💾 TÉLÉCHARGER", btn_test_voice: "🔊 Tester", lbl_texts: "📝 TEXTES", lbl_sentences: "Phrases:", lbl_final_msgs: "Messages finaux:", lbl_voice: "🗣️ VOIX", lbl_timer: "⏱️ MINUTEUR", opt_stopwatch: "Chrono", opt_countdown: "Rebours", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAUVER", btn_save: "Sauver", lbl_my_games: "📁 MES JEUX", g_check: "VÉRIFIER", g_reset: "RESET", g_complete: "Terminé!", g_score: "Score: ", g_time: "Temps: ", g_again: "REJOUER", g_timeout: "Temps écoulé!", btn_reset_jars: "🔄 Réinitialiser les pots" }
     };
 
     function changeLanguage() {
         const lang = document.getElementById('editor-lang').value;
-        const d = dict[lang] || dict['en'];
+        const d = dict[lang] || dict['ru'];
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
             if (d[key]) { if (el.tagName === 'INPUT' && el.type === 'button') el.value = d[key]; else el.innerText = d[key]; }
@@ -271,12 +271,18 @@
         logo: "", customPrize: "", abg: "", 
         awin: "https://actions.google.com/sounds/v1/cartoon/clime_up_the_ladder.ogg",
         afail: "https://actions.google.com/sounds/v1/cartoon/boing.ogg",
-        z: { logo: 95, hero: 10, pot: 5, jar: 20 }
+        z: { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 },
+        jarPos: {} // Индивидуальные позиции баночек
     };
 
     let currentSource = "";
     let globalZ = 200; 
     
+    function resetJarPositions() {
+        assets.jarPos = {};
+        updateCode();
+    }
+
     function buildConfigObject() {
         return {
             m: document.getElementById('m-list').value, slogans: document.getElementById('end-msgs').value.split(','),
@@ -333,7 +339,11 @@
         }
         if(c.emojis) document.getElementById('prize-emojis').value = Array.isArray(c.emojis) ? c.emojis.join(',') : c.emojis;
         if(c.failEmojis) document.getElementById('fail-emojis').value = Array.isArray(c.failEmojis) ? c.failEmojis.join(',') : c.failEmojis;
-        if(c.assets) { assets = c.assets; if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20 }; }
+        if(c.assets) { 
+            assets = c.assets; 
+            if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 }; 
+            if (!assets.jarPos) assets.jarPos = {};
+        }
     }
 
     function loadBank() {
@@ -360,7 +370,7 @@
             const reader = new FileReader(); 
             reader.onload = (e) => { 
                 assets[key] = e.target.result; 
-                if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20 };
+                if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 };
                 if (['logo', 'hero', 'pot', 'jar'].includes(key)) {
                     assets.z[key] = ++globalZ; 
                 }
@@ -387,8 +397,27 @@
             if (id === 'ui-score') { document.getElementById('ui-x').value = x; document.getElementById('ui-y').value = y; }
             if (id === 'ui-timer') { document.getElementById('tm-x').value = x; document.getElementById('tm-y').value = y; }
             if (id === 'spk-wrap') { document.getElementById('spk-x').value = x; document.getElementById('spk-y').value = y; }
-            if (id === 'bank-group') { document.getElementById('b-x').value = Math.round(x); document.getElementById('b-y').value = Math.round(y); }
+            if (id === 'game-logo') { document.getElementById('l-x').value = x; document.getElementById('l-y').value = y; }
+            if (id === 'bank-handle') { document.getElementById('b-x').value = Math.round(x); document.getElementById('b-y').value = Math.round(y); }
             if (id === 'sc') { document.getElementById('s-x').value = x; document.getElementById('s-y').value = y; }
+            
+            // Индивидуальные позиции баночек
+            if (id && id.startsWith('jar-pos-')) {
+                let idx = id.replace('jar-pos-', '');
+                if (!assets.jarPos) assets.jarPos = {};
+                assets.jarPos[idx] = { x: x, y: y };
+            }
+            updateCode(true); 
+        }
+        if (e.data.type === 'zUpdate') {
+            const { key } = e.data;
+            if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 };
+            assets.z[key] = ++globalZ;
+            
+            // Сетка слотов ВСЕГДА должна быть выше котла
+            if (key === 'pot') {
+                assets.z['sc'] = ++globalZ;
+            }
             updateCode(true); 
         }
     });
@@ -397,6 +426,9 @@
         const config = buildConfigObject();
         const lang = document.getElementById('editor-lang').value;
         const gDict = dict[lang] || dict['ru'];
+
+        // Вычисляем Z-index для сетки слотов, чтобы она гарантированно была выше котла
+        const scZ = Math.max((config.assets.z?.sc || 10), (config.assets.z?.pot || 5) + 1);
 
         const finalHtml = `
 <!DOCTYPE html>
@@ -408,15 +440,15 @@
         body { margin:0; overflow:hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
         #gv { width: 100vw; height: 100vh; position: relative; background: url('${config.assets.bg}') center/cover; }
         
-        .ui-panel { position: absolute; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 30px; border: 2px solid gold; font-size: 22px; font-weight: bold; transform: translate(-50%, -50%); z-index: 100; white-space: nowrap; }
+        .ui-panel { position: absolute; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 30px; border: 2px solid gold; font-size: 22px; font-weight: bold; transform: translate(-50%, -50%); z-index: ${config.assets.z?.ui || 100}; white-space: nowrap; }
         #ui-score { left: ${config.ui.x}%; top: ${config.ui.y}%; }
-        #ui-timer { left: ${config.ui.tx}%; top: ${config.ui.ty}%; }
+        #ui-timer { left: ${config.ui.tx}%; top: ${config.ui.ty}%; z-index: ${config.assets.z?.timer || 100}; }
         
-        #spk-wrap { position: absolute; left: ${config.ui.sx}%; top: ${config.ui.sy}%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 30px; border: 2px solid gold; z-index: 100; }
+        #spk-wrap { position: absolute; left: ${config.ui.sx}%; top: ${config.ui.sy}%; transform: translate(-50%, -50%); display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 5px 15px; border-radius: 30px; border: 2px solid gold; z-index: ${config.assets.z?.spk || 100}; }
         #spk { font-size: 28px; cursor: pointer; filter: drop-shadow(0 0 5px white); }
         #vol { width: 70px; cursor: pointer; accent-color: gold; }
         
-        #game-logo { position: absolute; width: ${config.logo.w}px; left: ${config.logo.x}%; top: ${config.logo.y}%; transform: translate(-50%, -50%); border-radius: ${config.logo.shape}; z-index: ${config.assets.z?.logo || 95}; box-shadow: 0 4px 10px rgba(0,0,0,0.3); pointer-events: none; object-fit: cover; }
+        #game-logo { position: absolute; width: ${config.logo.w}px; left: ${config.logo.x}%; top: ${config.logo.y}%; transform: translate(-50%, -50%); border-radius: ${config.logo.shape}; z-index: ${config.assets.z?.logo || 95}; box-shadow: 0 4px 10px rgba(0,0,0,0.3); object-fit: cover; }
         
         #hr { position: absolute; width: ${config.hero.s}px; left: ${config.hero.x}%; top: ${config.hero.y}%; transform: translate(-50%,-50%); z-index: ${config.assets.z?.hero || 10}; cursor:pointer; }
         #hr img { width: 100%; animation: float 3s infinite ease-in-out; pointer-events: none; }
@@ -428,7 +460,7 @@
 
         #cz { position: absolute; width: ${config.pot.w}px; height: ${config.pot.h}px; left: ${config.pot.x}%; top: ${config.pot.y}%; transform: translate(-50%,-50%); background: url('${config.assets.pot}') center/100% 100% no-repeat; z-index: ${config.assets.z?.pot || 5}; }
         
-        #sc { position: absolute; left: ${config.pot.sx}%; top: ${config.pot.sy}%; transform: translate(-50%, -50%); display: flex; gap: ${config.pot.sg}px; flex-wrap: wrap; justify-content: center; z-index: 6; }
+        #sc { position: absolute; left: ${config.pot.sx}%; top: ${config.pot.sy}%; transform: translate(-50%, -50%); display: flex; gap: ${config.pot.sg}px; flex-wrap: wrap; justify-content: center; z-index: ${scZ}; }
         .slot { width: ${config.pot.sw}px; height: ${config.pot.sh}px; border: 2px dashed rgba(255,255,255,0.4); border-radius: 10px; flex-shrink: 0; }
         
         #bank { position: absolute; inset: 0; pointer-events: none; z-index: ${config.assets.z?.jar || 20}; }
@@ -444,7 +476,7 @@
 
         .fx-p { position: absolute; border-radius: 50%; animation: fwork 2.5s forwards; z-index: 100; pointer-events: none; }
         @keyframes fwork { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--rx)), var(--ry)) scale(var(--rs)); opacity: 0; } }
-        .f-red { position: fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
+        .f-red { fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
         @keyframes f-out { 0% {opacity:1} 100% {opacity:0} }
 
         .fly-e { position: absolute; transform: translate(-50%,-50%); font-size: 80px; animation: p-fly 2s forwards; z-index: 150; pointer-events: none; display: flex; justify-content:center; align-items:center;}
@@ -460,7 +492,7 @@
 </head>
 <body>
     <div id="gv">
-        ${config.assets.logo ? `<img id="game-logo" src="${config.assets.logo}">` : ''}
+        ${config.assets.logo ? `<img id="game-logo" class="draggable" src="${config.assets.logo}">` : ''}
         
         <div id="ui-score" class="ui-panel draggable">🏆 <span id="sv">0</span></div>
         <div id="ui-timer" class="ui-panel draggable"><span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
@@ -528,14 +560,21 @@
             
             jarWords.forEach((w, i) => {
                 const c = document.createElement('div'); c.className = 'card draggable';
+                c.id = 'jar-pos-' + i; // Уникальный ID для каждой баночки
                 let row = Math.floor(i / 2), col = i % 2;
-                c.dataset.row = row; c.dataset.col = col; // Save for dragging the grid
+                c.dataset.row = row; c.dataset.col = col; 
                 
                 const tSpan = document.createElement('span'); tSpan.className = 'jar-text'; tSpan.innerText = w; 
                 c.appendChild(tSpan);
                 
-                c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; 
-                c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
+                // Проверка на индивидуальные координаты
+                if (cfg.assets.jarPos && cfg.assets.jarPos[i]) {
+                    c.style.left = cfg.assets.jarPos[i].x + '%';
+                    c.style.top = cfg.assets.jarPos[i].y + '%';
+                } else {
+                    c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; 
+                    c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
+                }
                 
                 c.onclick = (e) => {
                     if(window !== window.top && window.isDragging) return; 
@@ -549,9 +588,13 @@
                         if(next) { next.appendChild(c); c.style.position='relative'; c.style.left='0'; c.style.top='0'; score++; }
                     } else { 
                         document.getElementById('bank').appendChild(c); c.style.position='absolute'; score--; 
-                        // Return to relative bank position correctly
-                        c.style.left = (parseInt(cfg.bank.x) + parseInt(c.dataset.col) * parseInt(cfg.bank.gx)) + 'px';
-                        c.style.top = (parseInt(cfg.bank.y) + parseInt(c.dataset.row) * parseInt(cfg.bank.gy)) + 'px';
+                        if (cfg.assets.jarPos && cfg.assets.jarPos[i]) {
+                            c.style.left = cfg.assets.jarPos[i].x + '%';
+                            c.style.top = cfg.assets.jarPos[i].y + '%';
+                        } else {
+                            c.style.left = (parseInt(cfg.bank.x) + parseInt(c.dataset.col) * parseInt(cfg.bank.gx)) + 'px';
+                            c.style.top = (parseInt(cfg.bank.y) + parseInt(c.dataset.row) * parseInt(cfg.bank.gy)) + 'px';
+                        }
                     }
                     document.getElementById('sv').innerText = score;
                 };
@@ -619,10 +662,10 @@
             if(cfg.slogans.length > 0) document.getElementById('final-msg').innerText = cfg.slogans[Math.floor(Math.random() * cfg.slogans.length)].trim();
         }
 
-        // --- ДВИЖОК DRAG & DROP С ГРУППИРОВКОЙ И УМНЫМИ СЛОЯМИ ---
+        // --- ДВИЖОК DRAG & DROP С ИНДИВИДУАЛЬНЫМИ БАНОЧКАМИ ---
         if (window !== window.top) {
             const s = document.createElement('style');
-            s.innerHTML = '.draggable { outline: 2px dashed rgba(255,215,0,0.6); cursor: move !important; } .draggable:hover { outline-color: #0f0; z-index: 10000 !important; }';
+            s.innerHTML = '.draggable { outline: 2px dashed rgba(255,215,0,0.6); cursor: move !important; pointer-events: auto !important; } .draggable:hover { outline-color: #0f0; z-index: 10000 !important; }';
             document.head.appendChild(s);
 
             let dragged = null, shiftX, shiftY;
@@ -633,33 +676,47 @@
                 let t = e.target.closest('.draggable');
                 if (!t || e.target.tagName === 'INPUT') return;
                 dragged = t; 
+                
+                let zKey = null;
+                if(dragged.id === 'hr') zKey = 'hero';
+                else if(dragged.id === 'cz') {
+                    zKey = 'pot';
+                    const scElem = document.getElementById('sc');
+                    if (scElem) scElem.style.zIndex = ++maxZ; // Мгновенно выводим сетку поверх котла
+                }
+                else if(dragged.id === 'game-logo') zKey = 'logo';
+                else if(dragged.classList.contains('card')) zKey = 'jar';
+                else if(dragged.id === 'ui-score') zKey = 'ui';
+                else if(dragged.id === 'ui-timer') zKey = 'timer';
+                else if(dragged.id === 'spk-wrap') zKey = 'spk';
+                else if(dragged.id === 'sc') zKey = 'sc';
+
+                if (zKey) {
+                    window.parent.postMessage({ type: 'zUpdate', key: zKey }, '*');
+                }
+                
                 dragged.style.zIndex = ++maxZ; 
+                
+                let card = dragged.closest('.card');
+                if (card) {
+                    card.style.zIndex = ++maxZ;
+                    window.parent.postMessage({ type: 'zUpdate', key: 'jar' }, '*');
+                }
                 
                 let rect = dragged.getBoundingClientRect();
                 shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
-                
-                if (dragged.classList.contains('card') && dragged.parentElement.id === 'bank') {
-                    document.querySelectorAll('#bank .card').forEach(c => {
-                        c.dataset.origX = parseFloat(c.style.left) || 0;
-                        c.dataset.origY = parseFloat(c.style.top) || 0;
-                    });
-                }
                 e.preventDefault();
             });
 
             document.addEventListener('mousemove', (e) => {
                 if (!dragged) return;
                 window.isDragging = true;
-                if (dragged.classList.contains('card') && dragged.parentElement.id === 'bank') {
+                
+                if (dragged.id === 'bank-handle') {
                     let px = e.clientX - shiftX; let py = e.clientY - shiftY;
-                    let dx = px - parseFloat(dragged.dataset.origX);
-                    let dy = py - parseFloat(dragged.dataset.origY);
-                    
-                    document.querySelectorAll('#bank .card').forEach(c => {
-                        c.style.left = (parseFloat(c.dataset.origX) + dx) + 'px';
-                        c.style.top = (parseFloat(c.dataset.origY) + dy) + 'px';
-                    });
+                    dragged.style.left = px + 'px'; dragged.style.top = py + 'px';
                 } else {
+                    // Стандартная обработка позиций в процентах для ВСЕХ элементов (включая баночки)
                     let rect = dragged.getBoundingClientRect();
                     let cx = e.clientX - shiftX + rect.width / 2; let cy = e.clientY - shiftY + rect.height / 2;
                     let px = (cx / window.innerWidth) * 100; let py = (cy / window.innerHeight) * 100;
@@ -670,16 +727,15 @@
             document.addEventListener('mouseup', (e) => {
                 if (!dragged) return;
                 let x, y, id = dragged.id;
-                if (dragged.classList.contains('card') && dragged.parentElement.id === 'bank') {
-                    let col = parseInt(dragged.dataset.col);
-                    let row = parseInt(dragged.dataset.row);
-                    x = parseFloat(dragged.style.left) - col * cfg.bank.gx;
-                    y = parseFloat(dragged.style.top) - row * cfg.bank.gy;
-                    id = 'bank-group';
+                
+                if (dragged.id === 'bank-handle') {
+                    x = parseFloat(dragged.style.left); // В пикселях
+                    y = parseFloat(dragged.style.top); // В пикселях
                 } else {
                     x = parseFloat(dragged.style.left).toFixed(2);
                     y = parseFloat(dragged.style.top).toFixed(2);
                 }
+                
                 window.parent.postMessage({ type: 'posUpdate', id: id, x: x, y: y }, '*');
                 dragged = null;
                 setTimeout(() => window.isDragging = false, 50);
@@ -704,7 +760,7 @@
     function downloadGame() {
         if(!currentSource) { alert('Сначала создайте игру!'); return; }
         const blob = new Blob([currentSource], { type: 'text/html' });
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'magic-pot-v8-masterpiece.html';
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'magic-pot-v9-pro-fixed.html';
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
