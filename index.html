@@ -2,7 +2,7 @@
 <html lang='ru'>
 <head>
     <meta charset='UTF-8'>
-    <title>Magic Pot v9.1 - Ultimate Foreground & Free Drag</title>
+    <title>Magic Pot v10.0 - Professional Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root { --bg-dark: #1a0b2e; --panel-bg: #2d1b4e; --gold: #d4af37; --text-light: #e0dbe9; --tab-bg: #3e266b; --tab-active: #5a3e85; }
@@ -12,8 +12,8 @@
         #editor-panel { width: 480px; background: var(--panel-bg); display: flex; flex-direction: column; border-right: 3px solid var(--gold); flex-shrink: 0; box-shadow: 5px 0 15px rgba(0,0,0,0.5); }
         h2 { margin: 15px 0; font-family: 'Cinzel', serif; color: var(--gold); text-align: center; letter-spacing: 2px; }
         
-        .tabs { display: flex; background: var(--tab-bg); border-bottom: 2px solid var(--gold); }
-        .tab-btn { flex: 1; padding: 10px 5px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
+        .tabs { display: flex; background: var(--tab-bg); border-bottom: 2px solid var(--gold); flex-wrap: wrap; }
+        .tab-btn { flex: 1 1 auto; padding: 10px 5px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 10px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
         .tab-btn:hover { background: rgba(255,255,255,0.1); }
         .tab-btn.active { background: var(--tab-active); color: var(--gold); border-bottom: 3px solid var(--gold); }
         .tab-content { display: none; padding: 15px; overflow-y: auto; flex-grow: 1; }
@@ -43,8 +43,15 @@
         .btn-danger { background: #e74c3c; } .btn-danger:hover { background: #c0392b; }
         
         #code-output { height: 50px; font-family: monospace; color: #76ff03; border: 1px solid var(--gold); font-size: 10px; background: #000; margin-bottom: 10px; resize: none; overflow: hidden; }
-        #preview-area { flex-grow: 1; background: #000; position: relative; display: flex; align-items: center; justify-content: center; }
-        #live-frame { width: 100%; height: 100%; border: none; background: #000; position: absolute; top:0; left:0; }
+        
+        #preview-area { flex-grow: 1; background: #000; display: flex; flex-direction: column; position: relative; }
+        #preview-header { display: flex; background: var(--tab-bg); border-bottom: 2px solid var(--gold); }
+        .prev-tab { flex: 1; padding: 10px; background: transparent; border: none; color: var(--text-light); cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; transition: background 0.3s; }
+        .prev-tab:hover { background: rgba(255,255,255,0.1); }
+        .prev-tab.active { background: var(--tab-active); color: var(--gold); border-bottom: 3px solid var(--gold); }
+        
+        #live-frame { width: 100%; height: 100%; border: none; background: #000; position: absolute; top: 0; left: 0; }
+        .frame-wrapper { position: relative; flex-grow: 1; width: 100%; }
 
         .bank-item { background: rgba(255,255,255,0.05); padding: 8px; border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #5a3e85; }
         .bank-item span { font-size: 12px; font-weight: bold; cursor: pointer; flex-grow: 1; }
@@ -58,7 +65,7 @@
 
 <div id='editor-panel'>
     <div class="top-bar">
-        <h2>Magic Pot v9.1</h2>
+        <h2>Magic Pot v10.0</h2>
         <select id="editor-lang" class="lang-select" onchange="changeLanguage()">
             <option value="ru">🇷🇺 RU</option>
             <option value="en">🇬🇧 EN</option>
@@ -69,6 +76,7 @@
 
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab('tab-main')" data-i18n="tab_main">База</button>
+        <button class="tab-btn" onclick="openTab('tab-screens')">Экраны</button>
         <button class="tab-btn" onclick="openTab('tab-visuals')" data-i18n="tab_visuals">Визуал</button>
         <button class="tab-btn" onclick="openTab('tab-location')" data-i18n="tab_location">Место</button>
         <button class="tab-btn" onclick="openTab('tab-size')" data-i18n="tab_size">Размер</button>
@@ -124,7 +132,51 @@
         </div>
     </div>
 
-    <!-- ТАБ 2: ВИЗУАЛ -->
+    <!-- ТАБ 2: ЭКРАНЫ -->
+    <div id="tab-screens" class="tab-content">
+        <div class='magic-box'>
+            <label>⚙️ НАСТРОЙКИ ЭКРАНОВ</label>
+            <label style="color:#fff; text-transform:none; font-size:12px; display:flex; align-items:center; gap:5px;">
+                <input type="checkbox" id="sc-use-start" checked onchange="updateCode()" style="width:auto;"> Показывать стартовую страницу
+            </label>
+            <label style="color:#fff; text-transform:none; font-size:12px; display:flex; align-items:center; gap:5px; margin-top:5px;">
+                <input type="checkbox" id="sc-use-end" checked onchange="updateCode()" style="width:auto;"> Показывать страницу финала
+            </label>
+        </div>
+
+        <div class='magic-box'>
+            <label>🎬 СТАРТОВАЯ СТРАНИЦА</label>
+            <div class="sub-label">Заголовок игры:</div>
+            <input type='text' id='sc-t-text' value='THE MAGIC WORD HUNTERS' oninput='updateCode()'>
+            <div class='grid-3' style="margin-top:5px;">
+                <div>
+                    <div class="sub-label">Шрифт</div>
+                    <select id='sc-t-font' onchange='updateCode()'>
+                        <option value="'Cinzel', serif">Cinzel</option>
+                        <option value="'Segoe UI', sans-serif">Segoe UI</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Comic Sans MS', cursive">Comic</option>
+                    </select>
+                </div>
+                <div><div class="sub-label">Цвет</div><input type='color' id='sc-t-col' value='#d4af37' oninput='updateCode()'></div>
+                <div><div class="sub-label">Размер px</div><input type='number' id='sc-t-sz' value='60' oninput='updateCode()'></div>
+            </div>
+            
+            <div class="sub-label" style="margin-top:10px;">Инструкция / Задание:</div>
+            <textarea id='sc-i-text' rows='3' oninput='updateCode()'>Find the right words and put them into the pot!</textarea>
+            <label style="color:#fff; text-transform:none; font-size:11px; display:flex; align-items:center; gap:5px; margin-top:5px;">
+                <input type="checkbox" id="sc-use-inst" checked onchange="updateCode()" style="width:auto;"> Показывать инструкцию
+            </label>
+
+            <div class="sub-label" style="margin-top:10px;">Кнопка "Старт":</div>
+            <div class='grid-2'>
+                <div><div class="sub-label">Текст кнопки</div><input type='text' id='sc-b-text' value='START GAME' oninput='updateCode()'></div>
+                <div><div class="sub-label">Цвет кнопки</div><input type='color' id='sc-b-col' value='#28a745' oninput='updateCode()'></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ТАБ 3: ВИЗУАЛ -->
     <div id="tab-visuals" class="tab-content">
         <div class='magic-box'>
             <label>🎨 ИЗОБРАЖЕНИЯ ФАЙЛЫ</label>
@@ -151,7 +203,7 @@
         </div>
     </div>
 
-    <!-- ТАБ 3: МЕСТОПОЛОЖЕНИЕ -->
+    <!-- ТАБ 4: МЕСТОПОЛОЖЕНИЕ -->
     <div id="tab-location" class="tab-content">
         <div class="section-div" style="margin-top:0;">📍 Можно менять мышью прямо на экране игры!</div>
         <div class='magic-box'>
@@ -190,7 +242,7 @@
         </div>
     </div>
 
-    <!-- ТАБ 4: РАЗМЕР -->
+    <!-- ТАБ 5: РАЗМЕР -->
     <div id="tab-size" class="tab-content">
         <div class='magic-box'>
             <label>📏 ГАБАРИТЫ И МАСШТАБ (PX)</label>
@@ -217,7 +269,7 @@
         </div>
     </div>
 
-    <!-- ТАБ 5: БАЗА ИГР -->
+    <!-- ТАБ 6: БАЗА ИГР -->
     <div id="tab-bank" class="tab-content">
         <div class="btn-group">
             <button class="btn-magic btn-json" onclick="exportJSON()" data-i18n="btn_exp_json">⬇️ ЭКСПОРТ JSON</button>
@@ -238,15 +290,33 @@
     </div>
 </div>
 
-<div id='preview-area'><iframe id="live-frame"></iframe></div>
+<!-- ЗОНА ПРЕДПРОСМОТРА С ВКЛАДКАМИ -->
+<div id='preview-area'>
+    <div id="preview-header">
+        <button class="prev-tab active" onclick="setPreviewMode('game')">Редактор Игры</button>
+        <button class="prev-tab" onclick="setPreviewMode('play')">Готовая Игра</button>
+        <button class="prev-tab" onclick="setPreviewMode('start')">Старт. страница</button>
+        <button class="prev-tab" onclick="setPreviewMode('end')">Финал. страница</button>
+    </div>
+    <div class="frame-wrapper">
+        <iframe id="live-frame"></iframe>
+    </div>
+</div>
 
 <script>
     const dict = {
         ru: { tab_main: "База", tab_visuals: "Визуал", tab_location: "Место", tab_size: "Размер", tab_bank: "Память", btn_copy: "📋 КОПИРОВАТЬ", btn_download: "💾 СКАЧАТЬ ФАЙЛ", btn_test_voice: "🔊 Проверить голос", lbl_texts: "📝 ТЕКСТЫ И СЛОГАНЫ", lbl_sentences: "Предложения:", lbl_final_msgs: "Финальные фразы:", lbl_voice: "🗣️ ОЗВУЧКА", lbl_timer: "⏱️ ТАЙМЕР", opt_stopwatch: "Секундомер", opt_countdown: "Отсчет", btn_exp_json: "⬇️ ЭКСПОРТ JSON", btn_imp_json: "⬆️ ИМПОРТ JSON", lbl_save_bank: "💾 СОХРАНИТЬ", btn_save: "Сохранить", lbl_my_games: "📁 МОИ ИГРЫ", g_check: "ПРОВЕРИТЬ", g_reset: "СБРОС", g_complete: "Уровень пройден!", g_score: "Очки: ", g_time: "Время: ", g_again: "ИГРАТЬ СНОВА", g_timeout: "Время вышло!", btn_reset_jars: "🔄 Сбросить позиции баночек" },
-        en: { tab_main: "Base", tab_visuals: "Visuals", tab_location: "Location", tab_size: "Size", tab_bank: "Memory", btn_copy: "📋 COPY CODE", btn_download: "💾 DOWNLOAD", btn_test_voice: "🔊 Test Voice", lbl_texts: "📝 TEXTS & SLOGANS", lbl_sentences: "Sentences:", lbl_final_msgs: "Final Messages:", lbl_voice: "🗣️ VOICEOVER", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stopwatch", opt_countdown: "Countdown", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAVE", btn_save: "Save", lbl_my_games: "📁 MY GAMES", g_check: "CHECK", g_reset: "RESET", g_complete: "Level Complete!", g_score: "Score: ", g_time: "Time: ", g_again: "PLAY AGAIN", g_timeout: "Time is up!", btn_reset_jars: "🔄 Reset Jar Positions" },
-        de: { tab_main: "Basis", tab_visuals: "Optik", tab_location: "Position", tab_size: "Größe", tab_bank: "Speicher", btn_copy: "📋 KOPIEREN", btn_download: "💾 HERUNTERL.", btn_test_voice: "🔊 Testen", lbl_texts: "📝 TEXTE", lbl_sentences: "Sätze:", lbl_final_msgs: "Abschluss:", lbl_voice: "🗣️ STIMME", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stoppuhr", opt_countdown: "Countdown", btn_exp_json: "⬇️ JSON EXPORT", btn_imp_json: "⬆️ JSON IMPORT", lbl_save_bank: "💾 SPEICHERN", btn_save: "Speichern", lbl_my_games: "📁 MEINE SPIELE", g_check: "PRÜFEN", g_reset: "RESET", g_complete: "Geschafft!", g_score: "Punkte: ", g_time: "Zeit: ", g_again: "NOCHMAL", g_timeout: "Zeit abgelaufen!", btn_reset_jars: "🔄 Dosenpositionen zurücksetzen" },
-        fr: { tab_main: "Base", tab_visuals: "Visuels", tab_location: "Position", tab_size: "Taille", tab_bank: "Mémoire", btn_copy: "📋 COPIER", btn_download: "💾 TÉLÉCHARGER", btn_test_voice: "🔊 Tester", lbl_texts: "📝 TEXTES", lbl_sentences: "Phrases:", lbl_final_msgs: "Messages finaux:", lbl_voice: "🗣️ VOIX", lbl_timer: "⏱️ MINUTEUR", opt_stopwatch: "Chrono", opt_countdown: "Rebours", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAUVER", btn_save: "Sauver", lbl_my_games: "📁 MES JEUX", g_check: "VÉRIFIER", g_reset: "RESET", g_complete: "Terminé!", g_score: "Score: ", g_time: "Temps: ", g_again: "REJOUER", g_timeout: "Temps écoulé!", btn_reset_jars: "🔄 Réinitialiser les pots" }
+        en: { tab_main: "Base", tab_visuals: "Visuals", tab_location: "Location", tab_size: "Size", tab_bank: "Memory", btn_copy: "📋 COPY CODE", btn_download: "💾 DOWNLOAD", btn_test_voice: "🔊 Test Voice", lbl_texts: "📝 TEXTS & SLOGANS", lbl_sentences: "Sentences:", lbl_final_msgs: "Final Messages:", lbl_voice: "🗣️ VOICEOVER", lbl_timer: "⏱️ TIMER", opt_stopwatch: "Stopwatch", opt_countdown: "Countdown", btn_exp_json: "⬇️ EXPORT JSON", btn_imp_json: "⬆️ IMPORT JSON", lbl_save_bank: "💾 SAVE", btn_save: "Save", lbl_my_games: "📁 MY GAMES", g_check: "CHECK", g_reset: "RESET", g_complete: "Level Complete!", g_score: "Score: ", g_time: "Time: ", g_again: "PLAY AGAIN", g_timeout: "Time is up!", btn_reset_jars: "🔄 Reset Jar Positions" }
     };
+
+    let previewMode = 'game';
+
+    function setPreviewMode(mode) {
+        previewMode = mode;
+        document.querySelectorAll('.prev-tab').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        updateCode();
+    }
 
     function changeLanguage() {
         const lang = document.getElementById('editor-lang').value;
@@ -260,7 +330,7 @@
 
     function openTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#editor-panel .tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         event.currentTarget.classList.add('active');
     }
@@ -272,16 +342,13 @@
         awin: "https://actions.google.com/sounds/v1/cartoon/clime_up_the_ladder.ogg",
         afail: "https://actions.google.com/sounds/v1/cartoon/boing.ogg",
         z: { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 },
-        jarPos: {} // Индивидуальные позиции баночек
+        jarPos: {} 
     };
 
     let currentSource = "";
     let globalZ = 200; 
     
-    function resetJarPositions() {
-        assets.jarPos = {};
-        updateCode();
-    }
+    function resetJarPositions() { assets.jarPos = {}; updateCode(); }
 
     function buildConfigObject() {
         return {
@@ -299,6 +366,18 @@
             jar: { w: document.getElementById('j-w').value, h: document.getElementById('j-h').value, col: document.getElementById('j-col').value, sz: document.getElementById('j-sz').value, tx: document.getElementById('j-tx').value, ty: document.getElementById('j-ty').value },
             bank: { x: document.getElementById('b-x').value, y: document.getElementById('b-y').value, gx: document.getElementById('b-gx').value, gy: document.getElementById('b-gy').value },
             logo: { w: document.getElementById('l-w').value, x: document.getElementById('l-x').value, y: document.getElementById('l-y').value, shape: document.getElementById('l-shape').value },
+            screens: {
+                useStart: document.getElementById('sc-use-start').checked,
+                useEnd: document.getElementById('sc-use-end').checked,
+                tText: document.getElementById('sc-t-text').value,
+                tFont: document.getElementById('sc-t-font').value,
+                tCol: document.getElementById('sc-t-col').value,
+                tSz: document.getElementById('sc-t-sz').value,
+                iText: document.getElementById('sc-i-text').value,
+                useInst: document.getElementById('sc-use-inst').checked,
+                bText: document.getElementById('sc-b-text').value,
+                bCol: document.getElementById('sc-b-col').value,
+            },
             assets: assets, emojis: document.getElementById('prize-emojis').value.split(','), failEmojis: document.getElementById('fail-emojis').value.split(',')
         };
     }
@@ -336,6 +415,18 @@
         if(c.logo) {
             if(c.logo.w) document.getElementById('l-w').value = c.logo.w; if(c.logo.x) document.getElementById('l-x').value = c.logo.x;
             if(c.logo.y) document.getElementById('l-y').value = c.logo.y; if(c.logo.shape) document.getElementById('l-shape').value = c.logo.shape;
+        }
+        if(c.screens) {
+            if(c.screens.useStart !== undefined) document.getElementById('sc-use-start').checked = c.screens.useStart;
+            if(c.screens.useEnd !== undefined) document.getElementById('sc-use-end').checked = c.screens.useEnd;
+            if(c.screens.tText !== undefined) document.getElementById('sc-t-text').value = c.screens.tText;
+            if(c.screens.tFont !== undefined) document.getElementById('sc-t-font').value = c.screens.tFont;
+            if(c.screens.tCol !== undefined) document.getElementById('sc-t-col').value = c.screens.tCol;
+            if(c.screens.tSz !== undefined) document.getElementById('sc-t-sz').value = c.screens.tSz;
+            if(c.screens.iText !== undefined) document.getElementById('sc-i-text').value = c.screens.iText;
+            if(c.screens.useInst !== undefined) document.getElementById('sc-use-inst').checked = c.screens.useInst;
+            if(c.screens.bText !== undefined) document.getElementById('sc-b-text').value = c.screens.bText;
+            if(c.screens.bCol !== undefined) document.getElementById('sc-b-col').value = c.screens.bCol;
         }
         if(c.emojis) document.getElementById('prize-emojis').value = Array.isArray(c.emojis) ? c.emojis.join(',') : c.emojis;
         if(c.failEmojis) document.getElementById('fail-emojis').value = Array.isArray(c.failEmojis) ? c.failEmojis.join(',') : c.failEmojis;
@@ -400,8 +491,6 @@
             if (id === 'game-logo') { document.getElementById('l-x').value = x; document.getElementById('l-y').value = y; }
             if (id === 'bank-handle') { document.getElementById('b-x').value = Math.round(x); document.getElementById('b-y').value = Math.round(y); }
             if (id === 'sc') { document.getElementById('s-x').value = x; document.getElementById('s-y').value = y; }
-            
-            // Индивидуальные позиции баночек
             if (id && id.startsWith('jar-pos-')) {
                 let idx = id.replace('jar-pos-', '');
                 if (!assets.jarPos) assets.jarPos = {};
@@ -413,11 +502,7 @@
             const { key } = e.data;
             if (!assets.z) assets.z = { logo: 95, hero: 10, pot: 5, jar: 20, ui: 100, timer: 100, spk: 100, sc: 10 };
             assets.z[key] = ++globalZ;
-            
-            // Сетка слотов ВСЕГДА должна быть выше котла
-            if (key === 'pot') {
-                assets.z['sc'] = ++globalZ;
-            }
+            if (key === 'pot') assets.z['sc'] = ++globalZ;
             updateCode(true); 
         }
     });
@@ -427,10 +512,10 @@
         const lang = document.getElementById('editor-lang').value;
         const gDict = dict[lang] || dict['ru'];
 
-        // Вычисляем Z-index для сетки слотов, чтобы она гарантированно была выше котла
         const scZ = Math.max((config.assets.z?.sc || 10), (config.assets.z?.pot || 5) + 1);
 
-        const finalHtml = `
+        // БАЗОВЫЙ ЧИСТЫЙ КОД ИГРЫ (без скриптов редактора)
+        const baseHtml = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -440,6 +525,15 @@
         body { margin:0; overflow:hidden; font-family: 'Segoe UI', sans-serif; background: #000; color: white; }
         #gv { width: 100vw; height: 100vh; position: relative; background: url('${config.assets.bg}') center/cover; }
         
+        .screen { position: absolute; inset: 0; width: 100%; height: 100%; }
+        
+        #screen-start { display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 3000; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); }
+        #st-title { font-family: ${config.screens.tFont}; color: ${config.screens.tCol}; font-size: ${config.screens.tSz}px; text-align: center; text-shadow: 2px 2px 5px #000; margin: 0 0 20px 0; }
+        #st-inst { font-size: 20px; text-align: center; max-width: 80%; background: rgba(0,0,0,0.5); padding: 15px; border-radius: 10px; color: #fff; margin-bottom: 30px; }
+        #st-btn { background: ${config.screens.bCol}; padding: 15px 40px; border: none; border-radius: 30px; font-size: 24px; font-weight: bold; cursor: pointer; color: white; text-shadow: 1px 1px 2px black; box-shadow: 0 4px 0 rgba(0,0,0,0.4); transition: transform 0.2s; }
+        #st-btn:hover { transform: scale(1.05); }
+        #st-btn:active { transform: scale(0.95); }
+
         .ui-panel { position: absolute; background: rgba(0,0,0,0.7); padding: 10px 20px; border-radius: 30px; border: 2px solid gold; font-size: 22px; font-weight: bold; transform: translate(-50%, -50%); z-index: ${config.assets.z?.ui || 100}; white-space: nowrap; }
         #ui-score { left: ${config.ui.x}%; top: ${config.ui.y}%; }
         #ui-timer { left: ${config.ui.tx}%; top: ${config.ui.ty}%; z-index: ${config.assets.z?.timer || 100}; }
@@ -476,14 +570,14 @@
 
         .fx-p { position: absolute; border-radius: 50%; animation: fwork 2.5s forwards; z-index: 100; pointer-events: none; }
         @keyframes fwork { 0% { transform: translate(-50%, 0) scale(0.3); opacity: 0; } 20% { opacity: 1; } 100% { transform: translate(calc(-50% + var(--rx)), var(--ry)) scale(var(--rs)); opacity: 0; } }
-        .f-red { fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
+        .f-red { position: fixed; inset: 0; background: rgba(255,0,0,0.4); z-index: 1000; animation: f-out 0.5s forwards; pointer-events: none; }
         @keyframes f-out { 0% {opacity:1} 100% {opacity:0} }
 
         .fly-e { position: absolute; transform: translate(-50%,-50%); font-size: 80px; animation: p-fly 2s forwards; z-index: 150; pointer-events: none; display: flex; justify-content:center; align-items:center;}
         .fly-e img { width: 120px; height: 120px; object-fit: contain; filter: drop-shadow(0 0 10px gold); }
         @keyframes p-fly { 0%{transform:translate(-50%, 0) scale(0)} 50%{transform:translate(calc(-50% + var(--rx)), -150px) scale(1.3)} 100%{transform:translate(calc(-50% + var(--rx)), -100px) scale(1); opacity:1} }
 
-        #fin { position: fixed; inset: 0; background: rgba(20, 10, 40, 0.98); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; color: gold; text-align: center; }
+        #screen-end { display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 4000; color: gold; text-align: center; background: rgba(20, 10, 40, 0.98); }
         .gallery { display: flex; gap: 10px; margin-top: 20px; font-size: 45px; flex-wrap: wrap; justify-content: center; max-width: 80%; }
         .gallery img { width: 80px; height: 80px; object-fit: contain; }
         #final-msg { font-size: 28px; color: #fff; margin: 10px 0 20px 0; font-family: 'Segoe UI', sans-serif; text-shadow: 0 0 10px gold; font-style: italic; opacity: 0; animation: fadeUp 1s ease-out 0.5s forwards; }
@@ -492,26 +586,37 @@
 </head>
 <body>
     <div id="gv">
-        ${config.assets.logo ? `<img id="game-logo" class="draggable" src="${config.assets.logo}">` : ''}
-        
-        <div id="ui-score" class="ui-panel draggable">🏆 <span id="sv">0</span></div>
-        <div id="ui-timer" class="ui-panel draggable"><span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
-        <div id="spk-wrap" class="draggable">
-            <span id="spk" onclick="speak()">🔊</span>
-            <input type="range" id="vol" min="0" max="1" step="0.1" value="1" oninput="updateVol(this.value)">
+        <!-- СТАРТОВЫЙ ЭКРАН -->
+        <div id="screen-start" class="screen">
+            <h1 id="st-title">${config.screens.tText}</h1>
+            ${config.screens.useInst ? `<div id="st-inst">${config.screens.iText}</div>` : ''}
+            <button id="st-btn" onclick="startGameFlow()">${config.screens.bText}</button>
         </div>
 
-        <div id="hr" class="draggable" onclick="toggleHint()"><div id="hc"></div><img src="${config.assets.hero}"></div>
-        <div id="cz" class="draggable"></div>
-        <div id="sc" class="draggable"></div>
-        <div id="bank"></div>
-        
-        <div class="btn-wrap">
-            <button id="btn-check" class="game-btn" onclick="check()">${gDict.g_check}</button>
-            <button id="btn-reset" class="game-btn" onclick="initLevel()">${gDict.g_reset}</button>
+        <!-- ИГРОВОЙ ЭКРАН -->
+        <div id="screen-game" class="screen" style="display:none;">
+            ${config.assets.logo ? `<img id="game-logo" class="draggable" src="${config.assets.logo}">` : ''}
+            
+            <div id="ui-score" class="ui-panel draggable">🏆 <span id="sv">0</span></div>
+            <div id="ui-timer" class="ui-panel draggable"><span id="t-icon">⏳</span> <span id="tv">00:00</span></div>
+            <div id="spk-wrap" class="draggable">
+                <span id="spk" onclick="speak()">🔊</span>
+                <input type="range" id="vol" min="0" max="1" step="0.1" value="1" oninput="updateVol(this.value)">
+            </div>
+
+            <div id="hr" class="draggable" onclick="toggleHint()"><div id="hc"></div><img src="${config.assets.hero}"></div>
+            <div id="cz" class="draggable"></div>
+            <div id="sc" class="draggable"></div>
+            <div id="bank"></div>
+            
+            <div class="btn-wrap">
+                <button id="btn-check" class="game-btn" onclick="check()">${gDict.g_check}</button>
+                <button id="btn-reset" class="game-btn" onclick="initLevel()">${gDict.g_reset}</button>
+            </div>
         </div>
-        
-        <div id="fin">
+
+        <!-- ФИНАЛЬНЫЙ ЭКРАН -->
+        <div id="screen-end" class="screen">
             <h1 style="font-family:Cinzel,serif; font-size:4em; margin-bottom: 0;">${gDict.g_complete}</h1>
             <div id="final-msg"></div>
             <p style="font-size:24px;">${gDict.g_score} <span id="fs">0</span> | ${gDict.g_time} <span id="ft">0</span></p>
@@ -525,6 +630,23 @@
         let step = 0, score = 0, collected = [], timeVal = 0, tInt, audBG;
         window.gameVol = 1.0;
         let sentences = cfg.m.split('\\n').filter(s => s.trim());
+
+        // Управление экранами в готовой игре
+        window.onload = () => {
+            if (window.isEditorMode) return; // Управляется из редактора
+            if (cfg.screens.useStart) {
+                document.getElementById('screen-start').style.display = 'flex';
+                document.getElementById('screen-game').style.display = 'none';
+            } else {
+                startGameFlow();
+            }
+        };
+
+        function startGameFlow() {
+            document.getElementById('screen-start').style.display = 'none';
+            document.getElementById('screen-game').style.display = 'block';
+            initLevel();
+        }
 
         function updateVol(v) { window.gameVol = v; if(audBG) audBG.volume = v; }
         function playSnd(url) { if(!url) return; let a = new Audio(url); a.volume = window.gameVol; a.play().catch(()=>{}); }
@@ -560,26 +682,24 @@
             
             jarWords.forEach((w, i) => {
                 const c = document.createElement('div'); c.className = 'card draggable';
-                c.id = 'jar-pos-' + i; // Уникальный ID для каждой баночки
+                c.id = 'jar-pos-' + i; 
                 let row = Math.floor(i / 2), col = i % 2;
                 c.dataset.row = row; c.dataset.col = col; 
                 
                 const tSpan = document.createElement('span'); tSpan.className = 'jar-text'; tSpan.innerText = w; 
                 c.appendChild(tSpan);
                 
-                // Проверка на индивидуальные координаты
                 if (cfg.assets.jarPos && cfg.assets.jarPos[i]) {
-                    c.style.left = cfg.assets.jarPos[i].x + '%';
-                    c.style.top = cfg.assets.jarPos[i].y + '%';
+                    c.style.left = cfg.assets.jarPos[i].x + '%'; c.style.top = cfg.assets.jarPos[i].y + '%';
                 } else {
-                    c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; 
-                    c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
+                    c.style.left = (parseInt(cfg.bank.x) + col * parseInt(cfg.bank.gx)) + 'px'; c.style.top = (parseInt(cfg.bank.y) + row * parseInt(cfg.bank.gy)) + 'px';
                 }
                 
                 c.onclick = (e) => {
-                    if(window !== window.top && window.isDragging) return; 
+                    if(window.isEditorMode && window.isDragging) return; 
                     if(!window.gameTopZ) window.gameTopZ = 1000;
                     c.style.zIndex = ++window.gameTopZ; 
+                    
                     if(!tInt) startTimer();
                     if(cfg.assets.abg && (!audBG || audBG.paused)) { audBG = new Audio(cfg.assets.abg); audBG.loop = true; audBG.volume = window.gameVol; audBG.play().catch(()=>{}); }
                     
@@ -589,8 +709,7 @@
                     } else { 
                         document.getElementById('bank').appendChild(c); c.style.position='absolute'; score--; 
                         if (cfg.assets.jarPos && cfg.assets.jarPos[i]) {
-                            c.style.left = cfg.assets.jarPos[i].x + '%';
-                            c.style.top = cfg.assets.jarPos[i].y + '%';
+                            c.style.left = cfg.assets.jarPos[i].x + '%'; c.style.top = cfg.assets.jarPos[i].y + '%';
                         } else {
                             c.style.left = (parseInt(cfg.bank.x) + parseInt(c.dataset.col) * parseInt(cfg.bank.gx)) + 'px';
                             c.style.top = (parseInt(cfg.bank.y) + parseInt(c.dataset.row) * parseInt(cfg.bank.gy)) + 'px';
@@ -655,103 +774,124 @@
 
         function toggleHint() { const h = document.getElementById('hc'); h.style.display = h.style.display==='block'?'none':'block'; }
         
-        function finish() { 
-            clearInterval(tInt); document.getElementById('fin').style.display='flex'; 
-            document.getElementById('fs').innerText=score; document.getElementById('ft').innerText=document.getElementById('tv').innerText; 
-            document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); 
-            if(cfg.slogans.length > 0) document.getElementById('final-msg').innerText = cfg.slogans[Math.floor(Math.random() * cfg.slogans.length)].trim();
+        function finish(forceShow = false) { 
+            clearInterval(tInt); 
+            if (forceShow || cfg.screens.useEnd) {
+                document.getElementById('screen-game').style.display='none';
+                document.getElementById('screen-end').style.display='flex'; 
+                document.getElementById('fs').innerText=score; 
+                document.getElementById('ft').innerText=document.getElementById('tv').innerText; 
+                document.getElementById('pg').innerHTML = collected.map(c => '<div>'+c+'</div>').join(''); 
+                if(cfg.slogans.length > 0) document.getElementById('final-msg').innerText = cfg.slogans[Math.floor(Math.random() * cfg.slogans.length)].trim();
+            } else {
+                location.reload();
+            }
         }
-
-        // --- ДВИЖОК DRAG & DROP С ИНДИВИДУАЛЬНЫМИ БАНОЧКАМИ ---
-        if (window !== window.top) {
-            const s = document.createElement('style');
-            s.innerHTML = '.draggable { outline: 2px dashed rgba(255,215,0,0.6); cursor: move !important; pointer-events: auto !important; } .draggable:hover { outline-color: #0f0; z-index: 10000 !important; }';
-            document.head.appendChild(s);
-
-            let dragged = null, shiftX, shiftY;
-            let maxZ = 10000;
-            window.isDragging = false;
-
-            document.addEventListener('mousedown', (e) => {
-                let t = e.target.closest('.draggable');
-                if (!t || e.target.tagName === 'INPUT') return;
-                dragged = t; 
-                
-                let zKey = null;
-                if(dragged.id === 'hr') zKey = 'hero';
-                else if(dragged.id === 'cz') {
-                    zKey = 'pot';
-                    const scElem = document.getElementById('sc');
-                    if (scElem) scElem.style.zIndex = ++maxZ; // Мгновенно выводим сетку поверх котла
-                }
-                else if(dragged.id === 'game-logo') zKey = 'logo';
-                else if(dragged.classList.contains('card')) zKey = 'jar';
-                else if(dragged.id === 'ui-score') zKey = 'ui';
-                else if(dragged.id === 'ui-timer') zKey = 'timer';
-                else if(dragged.id === 'spk-wrap') zKey = 'spk';
-                else if(dragged.id === 'sc') zKey = 'sc';
-
-                if (zKey) {
-                    window.parent.postMessage({ type: 'zUpdate', key: zKey }, '*');
-                }
-                
-                dragged.style.zIndex = ++maxZ; 
-                
-                let card = dragged.closest('.card');
-                if (card) {
-                    card.style.zIndex = ++maxZ;
-                    window.parent.postMessage({ type: 'zUpdate', key: 'jar' }, '*');
-                }
-                
-                let rect = dragged.getBoundingClientRect();
-                shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
-                e.preventDefault();
-            });
-
-            document.addEventListener('mousemove', (e) => {
-                if (!dragged) return;
-                window.isDragging = true;
-                
-                if (dragged.id === 'bank-handle') {
-                    let px = e.clientX - shiftX; let py = e.clientY - shiftY;
-                    dragged.style.left = px + 'px'; dragged.style.top = py + 'px';
-                } else {
-                    // Стандартная обработка позиций в процентах для ВСЕХ элементов (включая баночки)
-                    let rect = dragged.getBoundingClientRect();
-                    let cx = e.clientX - shiftX + rect.width / 2; let cy = e.clientY - shiftY + rect.height / 2;
-                    let px = (cx / window.innerWidth) * 100; let py = (cy / window.innerHeight) * 100;
-                    dragged.style.left = px + '%'; dragged.style.top = py + '%';
-                }
-            });
-
-            document.addEventListener('mouseup', (e) => {
-                if (!dragged) return;
-                let x, y, id = dragged.id;
-                
-                if (dragged.id === 'bank-handle') {
-                    x = parseFloat(dragged.style.left); // В пикселях
-                    y = parseFloat(dragged.style.top); // В пикселях
-                } else {
-                    x = parseFloat(dragged.style.left).toFixed(2);
-                    y = parseFloat(dragged.style.top).toFixed(2);
-                }
-                
-                window.parent.postMessage({ type: 'posUpdate', id: id, x: x, y: y }, '*');
-                dragged = null;
-                setTimeout(() => window.isDragging = false, 50);
-            });
-        }
-
-        initLevel();
     <\/script>
 </body>
 </html>`;
 
-        currentSource = finalHtml;
-        document.getElementById('code-output').value = `<iframe width="100%" height="100%" frameborder="0" srcdoc='${finalHtml.replace(/'/g, "&#39;")}'></iframe>`;
+        // -------------------------------------------------------------
+        // ИНЖЕКЦИЯ КОДА ДЛЯ ОКНА ПРЕДПРОСМОТРА (Только внутри Редактора)
+        // -------------------------------------------------------------
+        let previewHtml = baseHtml;
+        
+        if (previewMode !== 'play') {
+            const editorCss = `<style>.draggable { outline: 2px dashed rgba(255,215,0,0.6); cursor: move !important; pointer-events: auto !important; } .draggable:hover { outline-color: #0f0; z-index: 10000 !important; }</style>`;
+            const editorJs = `<script>
+                window.isEditorMode = true;
+                let dragged = null, shiftX, shiftY, maxZ = 10000;
+                window.isDragging = false;
+
+                document.addEventListener('mousedown', (e) => {
+                    let t = e.target.closest('.draggable');
+                    if (!t || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+                    dragged = t; 
+                    
+                    let zKey = null;
+                    if(dragged.id === 'hr') zKey = 'hero';
+                    else if(dragged.id === 'cz') { zKey = 'pot'; const scElem = document.getElementById('sc'); if (scElem) scElem.style.zIndex = ++maxZ; }
+                    else if(dragged.id === 'game-logo') zKey = 'logo';
+                    else if(dragged.classList.contains('card')) zKey = 'jar';
+                    else if(dragged.id === 'ui-score') zKey = 'ui';
+                    else if(dragged.id === 'ui-timer') zKey = 'timer';
+                    else if(dragged.id === 'spk-wrap') zKey = 'spk';
+                    else if(dragged.id === 'sc') zKey = 'sc';
+
+                    if (zKey) window.parent.postMessage({ type: 'zUpdate', key: zKey }, '*');
+                    
+                    dragged.style.zIndex = ++maxZ; 
+                    let card = dragged.closest('.card');
+                    if (card) { card.style.zIndex = ++maxZ; window.parent.postMessage({ type: 'zUpdate', key: 'jar' }, '*'); }
+                    
+                    let rect = dragged.getBoundingClientRect();
+                    shiftX = e.clientX - rect.left; shiftY = e.clientY - rect.top;
+                    
+                    if (dragged.classList.contains('card') && dragged.parentElement.id === 'bank') {
+                        document.querySelectorAll('#bank .card').forEach(c => { c.dataset.origX = parseFloat(c.style.left) || 0; c.dataset.origY = parseFloat(c.style.top) || 0; });
+                    }
+                    e.preventDefault();
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!dragged) return;
+                    window.isDragging = true;
+                    
+                    if (dragged.id === 'bank-handle') {
+                        let px = e.clientX - shiftX; let py = e.clientY - shiftY;
+                        dragged.style.left = px + 'px'; dragged.style.top = py + 'px';
+                    } else {
+                        let rect = dragged.getBoundingClientRect();
+                        let cx = e.clientX - shiftX + rect.width / 2; let cy = e.clientY - shiftY + rect.height / 2;
+                        let px = (cx / window.innerWidth) * 100; let py = (cy / window.innerHeight) * 100;
+                        dragged.style.left = px + '%'; dragged.style.top = py + '%';
+                    }
+                });
+
+                document.addEventListener('mouseup', (e) => {
+                    if (!dragged) return;
+                    let x, y, id = dragged.id;
+                    if (dragged.id === 'bank-handle') {
+                        x = parseFloat(dragged.style.left); y = parseFloat(dragged.style.top);
+                    } else {
+                        x = parseFloat(dragged.style.left).toFixed(2); y = parseFloat(dragged.style.top).toFixed(2);
+                    }
+                    window.parent.postMessage({ type: 'posUpdate', id: id, x: x, y: y }, '*');
+                    dragged = null;
+                    setTimeout(() => window.isDragging = false, 50);
+                });
+                
+                window.addEventListener('DOMContentLoaded', () => {
+                    let bh = document.createElement('div');
+                    bh.id = 'bank-handle'; bh.className = 'draggable';
+                    bh.style.cssText = 'position:absolute; left:'+cfg.bank.x+'px; top:'+cfg.bank.y+'px; width:100px; height:100px; background:rgba(255,215,0,0.3); border:2px dashed gold; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:bold; font-size:12px; text-align:center; text-shadow:1px 1px 2px #000; z-index:50;';
+                    bh.innerHTML = 'START BANK<br>(Drag me)';
+                    document.getElementById('screen-game').appendChild(bh);
+                });
+            <\/script>`;
+            previewHtml = previewHtml.replace('</head>', editorCss + '</head>');
+            previewHtml = previewHtml.replace('</body>', editorJs + '</body>');
+        }
+
+        // Переключение видимости экранов для редактора
+        const modeSwitchJs = `<script>
+            setTimeout(() => {
+                if(window.isEditorMode) {
+                    document.getElementById('screen-start').style.display = '${previewMode === 'start' ? 'flex' : 'none'}';
+                    document.getElementById('screen-game').style.display = '${previewMode === 'game' ? 'block' : 'none'}';
+                    document.getElementById('screen-end').style.display = '${previewMode === 'end' ? 'flex' : 'none'}';
+                    if('${previewMode}' === 'game') initLevel();
+                    if('${previewMode}' === 'end') finish(true);
+                }
+            }, 50);
+        <\/script>`;
+        previewHtml = previewHtml.replace('</body>', modeSwitchJs + '</body>');
+
+        currentSource = baseHtml; // В КОПИРОВАНИЕ И СКАЧИВАНИЕ ИДЕТ ЧИСТЫЙ КОД ИГРЫ!
+        document.getElementById('code-output').value = `<iframe width="100%" height="100%" frameborder="0" srcdoc='${baseHtml.replace(/'/g, "&#39;")}'></iframe>`;
         
         if (!skipIframe) {
-            const blob = new Blob([finalHtml], { type: 'text/html' });
+            const blob = new Blob([previewHtml], { type: 'text/html' });
             document.getElementById('live-frame').src = URL.createObjectURL(blob);
         }
     }
@@ -760,7 +900,7 @@
     function downloadGame() {
         if(!currentSource) { alert('Сначала создайте игру!'); return; }
         const blob = new Blob([currentSource], { type: 'text/html' });
-        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'magic-pot-v9-pro-fixed.html';
+        const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'magic-pot-v10-pro.html';
         document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
